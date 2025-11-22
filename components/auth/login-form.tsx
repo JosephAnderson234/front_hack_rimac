@@ -3,7 +3,6 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
     ActivityIndicator,
@@ -20,7 +19,6 @@ export function LoginForm() {
   const { login } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const router = useRouter();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -32,12 +30,8 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       await login({ email, password });
-      console.log('[LoginForm] Login exitoso, redirigiendo...');
-      Alert.alert('Éxito', 'Inicio de sesión exitoso');
-      // Redirigir al home después del login
-      setTimeout(() => {
-        router.replace('/(tabs)');
-      }, 500);
+      console.log('[LoginForm] Login exitoso');
+      // El layout se encargará de la redirección automáticamente
     } catch (error: any) {
       console.error('[LoginForm] Error en login:', error);
       Alert.alert(

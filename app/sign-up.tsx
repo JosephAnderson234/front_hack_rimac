@@ -1,102 +1,81 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Alert, Button, StyleSheet, TextInput } from 'react-native';
-
+import { RegisterForm } from '@/components/auth/register-form';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useAuth } from '@/context/auth';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-export default function SignUp() {
-    const { signUp, isLoading } = useAuth();
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+export default function SignUpScreen() {
+  const router = useRouter();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
 
-    const handleSignUp = async () => {
-        console.log('[SignUp] Iniciando registro con:', { name, email });
-        if (!name || !email || !password) {
-            console.log('[SignUp] Faltan campos');
-            Alert.alert('Error', 'Por favor completa todos los campos');
-            return;
-        }
-        try {
-            console.log('[SignUp] Llamando a signUp context');
-            await signUp({ name, email, password });
-            console.log('[SignUp] Registro exitoso');
-        } catch (error: any) {
-            console.error('[SignUp] Error:', error);
-            Alert.alert('Error', error.message || 'No se pudo registrar el usuario');
-        }
-    };
-
-    return (
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <ThemedView style={styles.container}>
-            <ThemedText type="title" style={styles.title}>Registrarse</ThemedText>
-
-            <ThemedText type="defaultSemiBold">Nombre</ThemedText>
-            <TextInput
-                style={styles.input}
-                value={name}
-                onChangeText={setName}
-                placeholder="Tu nombre"
-                placeholderTextColor="#888"
-            />
-
-            <ThemedText type="defaultSemiBold">Email</ThemedText>
-            <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="ejemplo@correo.com"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                placeholderTextColor="#888"
-            />
-
-            <ThemedText type="defaultSemiBold">Contraseña</ThemedText>
-            <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="********"
-                secureTextEntry
-                placeholderTextColor="#888"
-            />
-
-            <Button title={isLoading ? "Cargando..." : "Registrarse"} onPress={handleSignUp} disabled={isLoading} />
-
-            <ThemedText
-                type="link"
-                style={styles.link}
-                onPress={() => router.back()}
-            >
-                ¿Ya tienes cuenta? Inicia sesión
+          <View style={styles.header}>
+            <ThemedText type="title" style={styles.title}>
+              Crear Cuenta
             </ThemedText>
+            <ThemedText style={styles.subtitle}>
+              Completa tus datos para registrarte
+            </ThemedText>
+          </View>
+
+          <RegisterForm />
+
+          <View style={styles.footer}>
+            <ThemedText style={styles.footerText}>
+              ¿Ya tienes cuenta?{' '}
+            </ThemedText>
+            <TouchableOpacity onPress={() => router.push('/sign-in')}>
+              <ThemedText style={[styles.link, { color: colors.tint }]}>
+                Inicia sesión
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
         </ThemedView>
-    );
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 20,
-    },
-    title: {
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    input: {
-        height: 50,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        paddingHorizontal: 10,
-        marginBottom: 15,
-        backgroundColor: '#fff',
-    },
-    link: {
-        marginTop: 20,
-        textAlign: 'center',
-    },
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    alignItems: 'center',
+  },
+  title: {
+    marginBottom: 8,
+  },
+  subtitle: {
+    opacity: 0.7,
+    textAlign: 'center',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  footerText: {
+    opacity: 0.7,
+  },
+  link: {
+    fontWeight: '600',
+  },
 });

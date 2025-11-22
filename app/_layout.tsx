@@ -25,11 +25,17 @@ function RootLayoutNav() {
     console.log('[RootLayout] User:', user);
     console.log('[RootLayout] Segments:', segments);
 
-    // Si el usuario acaba de loguearse y está en la pestaña auth, redirigir al home
-    const inAuthTab = segments[0] === '(tabs)' && segments[1] === 'auth';
-    
-    if (user && inAuthTab) {
-      console.log('[RootLayout] Usuario autenticado, redirigiendo a home...');
+    const inAuthScreens = segments[0] === 'sign-in' || segments[0] === 'sign-up';
+    const inTabs = segments[0] === '(tabs)';
+
+    // Si no está autenticado y no está en pantallas de auth, redirigir a sign-in
+    if (!user && !inAuthScreens) {
+      console.log('[RootLayout] No autenticado, redirigiendo a sign-in...');
+      router.replace('/sign-in');
+    }
+    // Si está autenticado y está en pantallas de auth, redirigir a tabs
+    else if (user && inAuthScreens) {
+      console.log('[RootLayout] Autenticado, redirigiendo a tabs...');
       router.replace('/(tabs)');
     }
   }, [user, segments, isLoading, rootNavigationState?.key]);
@@ -38,6 +44,8 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+        <Stack.Screen name="sign-up" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />

@@ -3,7 +3,6 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
     ActivityIndicator,
@@ -21,7 +20,6 @@ export function RegisterForm() {
   const { register } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const router = useRouter();
 
   const handleRegister = async () => {
     if (!name || !email || !password) {
@@ -38,12 +36,8 @@ export function RegisterForm() {
     setIsLoading(true);
     try {
       await register({ name, email, password });
-      console.log('[RegisterForm] Registro exitoso, redirigiendo...');
-      Alert.alert('Éxito', 'Registro exitoso');
-      // Redirigir al home después del registro
-      setTimeout(() => {
-        router.replace('/(tabs)');
-      }, 500);
+      console.log('[RegisterForm] Registro exitoso');
+      // El layout se encargará de la redirección automáticamente
     } catch (error: any) {
       console.error('[RegisterForm] Error en registro:', error);
       Alert.alert(

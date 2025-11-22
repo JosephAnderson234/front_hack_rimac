@@ -1,95 +1,76 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Alert, Button, StyleSheet, TextInput } from 'react-native';
-
+import { LoginForm } from '@/components/auth/login-form';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useAuth } from '@/context/auth';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-export default function SignIn() {
-    const { signIn, isLoading } = useAuth();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+export default function SignInScreen() {
+  const router = useRouter();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
 
-    const handleSignIn = async () => {
-        console.log('[SignIn] Iniciando login con:', email);
-        if (!email || !password) {
-            console.log('[SignIn] Faltan campos');
-            Alert.alert('Error', 'Por favor ingresa email y contraseña');
-            return;
-        }
-        try {
-            console.log('[SignIn] Llamando a signIn context');
-            await signIn({ email, password });
-            console.log('[SignIn] Login exitoso');
-        } catch (error: any) {
-            console.error('[SignIn] Error:', error);
-            Alert.alert('Error', error.message || 'Credenciales inválidas o error de conexión');
-        }
-    };
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ThemedView style={styles.container}>
+        <View style={styles.header}>
+          <ThemedText type="title" style={styles.title}>
+            Bienvenido
+          </ThemedText>
+          <ThemedText style={styles.subtitle}>
+            Inicia sesión para continuar
+          </ThemedText>
+        </View>
 
-    return (
-        <ThemedView style={styles.container}>
-            <ThemedText type="title" style={styles.title}>Iniciar Sesión</ThemedText>
+        <LoginForm />
 
-            <ThemedText type="defaultSemiBold">Email</ThemedText>
-            <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="ejemplo@correo.com"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                placeholderTextColor="#888"
-            />
-
-            <ThemedText type="defaultSemiBold">Contraseña</ThemedText>
-            <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="********"
-                secureTextEntry
-                placeholderTextColor="#888"
-            />
-
-            <Button title={isLoading ? "Cargando..." : "Ingresar"} onPress={handleSignIn} disabled={isLoading} />
-
-            <ThemedText
-                type="link"
-                style={styles.link}
-                onPress={() => {
-                    // @ts-ignore
-                    router.push('/sign-up')
-                }}
-            >
-                ¿No tienes cuenta? Regístrate
+        <View style={styles.footer}>
+          <ThemedText style={styles.footerText}>
+            ¿No tienes cuenta?{' '}
+          </ThemedText>
+          <TouchableOpacity onPress={() => router.push('/sign-up')}>
+            <ThemedText style={[styles.link, { color: colors.tint }]}>
+              Regístrate
             </ThemedText>
-        </ThemedView>
-    );
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    </KeyboardAvoidingView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 20,
-    },
-    title: {
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    input: {
-        height: 50,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        paddingHorizontal: 10,
-        marginBottom: 15,
-        backgroundColor: '#fff',
-    },
-    link: {
-        marginTop: 20,
-        textAlign: 'center',
-    },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    alignItems: 'center',
+  },
+  title: {
+    marginBottom: 8,
+  },
+  subtitle: {
+    opacity: 0.7,
+    textAlign: 'center',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  footerText: {
+    opacity: 0.7,
+  },
+  link: {
+    fontWeight: '600',
+  },
 });
