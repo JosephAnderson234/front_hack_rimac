@@ -1,8 +1,10 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/context/auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { logger } from '@/utils/logger';
+import { validateRegisterData } from '@/utils/validation';
 import React, { useState } from 'react';
 import {
     ActivityIndicator,
@@ -17,33 +19,26 @@ export function RegisterForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
   const { register } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+    // Validar datos
+    const validation = validateRegisterData(name, email, password);
+    if (!validation.isValid) {
+      Alert.alert('Error', validation.error);
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-
-    console.log('[RegisterForm] Iniciando registro con:', { name, email });
     setIsLoading(true);
     try {
       await register({ name, email, password });
-      console.log('[RegisterForm] Registro exitoso');
-      // El layout se encargará de la redirección automáticamente
+      logger.log('[RegisterForm] Registro exitoso');
     } catch (error: any) {
-      console.error('[RegisterForm] Error en registro:', error);
-      Alert.alert(
-        'Error',
-        error.message || 'Error al registrarse. Intenta con otro email.'
-      );
+      logger.error('[RegisterForm] Error:', error);
+      Alert.alert('Error', error.message || 'Error al registrarse');
     } finally {
       setIsLoading(false);
     }
@@ -51,27 +46,18 @@ export function RegisterForm() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
-        Crear Cuenta
-      </ThemedText>
-
       <TextInput
-        style={[
-          styles.input,
-          { borderColor: colors.icon, color: colors.text },
-        ]}
+        style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
         placeholder="Nombre"
         placeholderTextColor={colors.icon}
         value={name}
         onChangeText={setName}
         editable={!isLoading}
+        autoComplete="name"
       />
 
       <TextInput
-        style={[
-          styles.input,
-          { borderColor: colors.icon, color: colors.text },
-        ]}
+        style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
         placeholder="Email"
         placeholderTextColor={colors.icon}
         value={email}
@@ -79,19 +65,18 @@ export function RegisterForm() {
         autoCapitalize="none"
         keyboardType="email-address"
         editable={!isLoading}
+        autoComplete="email"
       />
 
       <TextInput
-        style={[
-          styles.input,
-          { borderColor: colors.icon, color: colors.text },
-        ]}
+        style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
         placeholder="Contraseña"
         placeholderTextColor={colors.icon}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         editable={!isLoading}
+        autoComplete="password"
       />
 
       <TouchableOpacity
@@ -113,10 +98,6 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     gap: 16,
-  },
-  title: {
-    marginBottom: 20,
-    textAlign: 'center',
   },
   input: {
     borderWidth: 1,

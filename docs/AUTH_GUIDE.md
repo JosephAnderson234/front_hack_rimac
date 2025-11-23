@@ -28,7 +28,7 @@ app/(tabs)/
 ### 1. El AuthProvider ya está configurado en `app/_layout.tsx`
 
 ```tsx
-import { AuthProvider } from '@/contexts/auth-context';
+import { AuthProvider } from '@/context/auth';
 
 export default function RootLayout() {
   return (
@@ -42,7 +42,7 @@ export default function RootLayout() {
 ### 2. Usar el hook useAuth en cualquier componente
 
 ```tsx
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/context/auth';
 
 function MiComponente() {
   const { user, isAuthenticated, login, logout } = useAuth();
