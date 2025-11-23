@@ -4,10 +4,10 @@
 El Chat Inteligente es un asistente médico de acompañamiento que aparece como un botón flotante en las pestañas de Salud, Agendas y Recetas.
 
 ## Ubicación del Botón Flotante
-- **Posición Vertical**: Centro de la pantalla (50%)
+- **Posición Vertical**: 100px desde la parte inferior (evita colisión con Dynamic Island y tab bar)
 - **Posición Horizontal**: Lado derecho (20px del borde)
 - **Tamaño**: 60x60 píxeles
-- **Estilo**: Botón circular con icono de chat
+- **Estilo**: Botón circular con icono de chat y sombra
 
 ## Contextos Automáticos
 El chat ajusta automáticamente su contexto según la pestaña:
@@ -16,7 +16,7 @@ El chat ajusta automáticamente su contexto según la pestaña:
 |---------|----------|
 | Salud | Estadisticas |
 | Agendas | Servicios |
-| Recetas | Receta |
+| Recetas | Recetas |
 
 ## Endpoint API
 - **URL**: `https://rk6wgnrpsc.execute-api.us-east-1.amazonaws.com/dev`
@@ -49,7 +49,7 @@ El chat ajusta automáticamente su contexto según la pestaña:
 ## Características
 - ✅ Conversación estilo WhatsApp
 - ✅ Historial de mensajes mantenido durante la sesión
-- ✅ Selector de contexto manual (General, Estadisticas, Servicios, Receta)
+- ✅ Selector de contexto manual (General, Estadisticas, Servicios, Recetas)
 - ✅ Indicador de carga mientras se procesa el mensaje
 - ✅ Scroll automático al último mensaje
 - ✅ Botón para limpiar el chat
@@ -59,7 +59,7 @@ El chat ajusta automáticamente su contexto según la pestaña:
 1. `components/chat-inteligente.tsx` - Componente principal del chat
 2. `app/(tabs)/salud.tsx` - Botón flotante con contexto "Estadisticas"
 3. `app/(tabs)/agendas.tsx` - Botón flotante con contexto "Servicios"
-4. `app/(tabs)/recetas.tsx` - Botón flotante con contexto "Receta"
+4. `app/(tabs)/recetas.tsx` - Botón flotante con contexto "Recetas"
 
 ## Logs de Depuración
 

@@ -142,7 +142,7 @@ export default function RecetasScreen() {
       <TouchableOpacity
         style={[styles.floatingButton, { backgroundColor: colors.tint }]}
         onPress={() => {
-          console.log('[RecetasScreen] Abriendo chat con contexto: Receta');
+          console.log('[RecetasScreen] Abriendo chat con contexto: Recetas');
           setChatVisible(true);
         }}
       >
@@ -156,7 +156,7 @@ export default function RecetasScreen() {
           console.log('[RecetasScreen] Cerrando chat');
           setChatVisible(false);
         }}
-        contextoInicial="Receta"
+        contextoInicial="Recetas"
       />
 
       <ScrollView
@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
   floatingButton: {
     position: 'absolute',
     right: 20,
-    top: '50%',
+    bottom: 100,
     width: 60,
     height: 60,
     borderRadius: 30,

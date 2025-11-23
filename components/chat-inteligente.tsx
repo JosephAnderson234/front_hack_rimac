@@ -176,12 +176,12 @@ export function ChatInteligente({ visible, onClose, contextoInicial }: ChatIntel
       <KeyboardAvoidingView
         style={[styles.container, { backgroundColor: colors.background }]}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        keyboardVerticalOffset={0}
       >
         {/* Header */}
         <View style={[styles.header, { backgroundColor: colors.tint }]}>
           <View style={styles.headerLeft}>
-            <Ionicons name="chatbubbles" size={24} color="#fff" />
+            <Ionicons name="chatbubbles" size={32} color="#fff" />
             <View>
               <Text style={styles.headerTitle}>Chat Inteligente</Text>
               <Text style={styles.headerSubtitle}>Contexto: {contexto}</Text>
@@ -189,10 +189,10 @@ export function ChatInteligente({ visible, onClose, contextoInicial }: ChatIntel
           </View>
           <View style={styles.headerActions}>
             <TouchableOpacity onPress={limpiarChat} style={styles.headerButton}>
-              <Ionicons name="trash-outline" size={20} color="#fff" />
+              <Ionicons name="trash-outline" size={24} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-              <Ionicons name="close" size={24} color="#fff" />
+              <Ionicons name="close" size={28} color="#fff" />
             </TouchableOpacity>
           </View>
         </View>
@@ -304,7 +304,7 @@ export function ChatInteligente({ visible, onClose, contextoInicial }: ChatIntel
             onPress={enviarMensaje}
             disabled={!inputText.trim() || isLoading}
           >
-            <Ionicons name="send" size={20} color="#fff" />
+            <Ionicons name="send" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -320,40 +320,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 24,
+    paddingHorizontal: 20,
+    minHeight: Platform.OS === 'ios' ? 120 : 100,
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '700',
     color: '#fff',
+    marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.85)',
   },
   headerActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
   headerButton: {
-    padding: 4,
+    padding: 6,
   },
   contextSelector: {
-    maxHeight: 50,
+    maxHeight: 60,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(128,128,128,0.2)',
   },
   contextSelectorContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 10,
   },
   contextChip: {
     paddingHorizontal: 16,
@@ -373,29 +375,32 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   messagesContent: {
-    padding: 16,
-    gap: 12,
+    padding: 20,
+    gap: 16,
+    flexGrow: 1,
   },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
-    gap: 12,
+    paddingVertical: 80,
+    gap: 16,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
   },
   emptySubtext: {
+    fontSize: 15,
     opacity: 0.7,
     textAlign: 'center',
+    paddingHorizontal: 20,
   },
   messageBubble: {
     maxWidth: '80%',
-    padding: 12,
-    borderRadius: 16,
-    gap: 4,
+    padding: 14,
+    borderRadius: 18,
+    gap: 6,
   },
   userBubble: {
     alignSelf: 'flex-end',
@@ -406,16 +411,16 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
   },
   messageText: {
-    fontSize: 15,
-    lineHeight: 20,
+    fontSize: 16,
+    lineHeight: 22,
     color: '#fff',
   },
   userMessageText: {
     color: '#fff',
   },
   messageTime: {
-    fontSize: 11,
-    opacity: 0.6,
+    fontSize: 12,
+    opacity: 0.65,
     color: '#fff',
   },
   userMessageTime: {
@@ -423,24 +428,26 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 16,
+    padding: 20,
+    paddingBottom: 90,
     gap: 12,
     borderTopWidth: 1,
     borderTopColor: 'rgba(128,128,128,0.2)',
+    backgroundColor: 'transparent',
   },
   input: {
     flex: 1,
     backgroundColor: 'rgba(128,128,128,0.15)',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 15,
-    maxHeight: 100,
+    borderRadius: 24,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    fontSize: 16,
+    maxHeight: 120,
   },
   sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
   },
