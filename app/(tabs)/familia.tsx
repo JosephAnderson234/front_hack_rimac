@@ -4,7 +4,7 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function FamiliaScreen() {
     const colorScheme = useColorScheme();
@@ -31,9 +31,9 @@ export default function FamiliaScreen() {
                     style={[styles.addButton, { backgroundColor: colors.tint }]}
                 >
                     <Ionicons name="add-circle-outline" size={24} color="#fff" />
-                    <ThemedText style={styles.addButtonText}>
+                    <Text style={styles.addButtonText}>
                         Agregar Miembro
-                    </ThemedText>
+                    </Text>
                 </TouchableOpacity>
 
                 {/* Lista de miembros */}

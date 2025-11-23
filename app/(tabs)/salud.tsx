@@ -3,12 +3,26 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function SaludScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const [steps, setSteps] = useState(0);
+
+  // Simulación de contador de pasos (en producción usarías un sensor real)
+  useEffect(() => {
+    // Iniciar con un valor base
+    setSteps(8432);
+    
+    // Simular incremento de pasos cada 5 segundos
+    const interval = setInterval(() => {
+      setSteps(prev => prev + Math.floor(Math.random() * 10));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <ThemedView style={styles.container}>
@@ -20,17 +34,36 @@ export default function SaludScreen() {
           </ThemedText>
         </ThemedView>
 
+        {/* Contador de Pasos Principal */}
+        <ThemedView style={[styles.stepsCard, { backgroundColor: colors.tint }]}>
+          <View style={styles.stepsContent}>
+            <Ionicons name="footsteps" size={48} color="#fff" />
+            <View style={styles.stepsInfo}>
+              <Text style={styles.stepsValue}>{steps.toLocaleString()}</Text>
+              <Text style={styles.stepsLabel}>Pasos Hoy</Text>
+            </View>
+          </View>
+          <View style={styles.stepsGoal}>
+            <View style={styles.progressBar}>
+              <View 
+                style={[
+                  styles.progressFill, 
+                  { width: `${Math.min((steps / 10000) * 100, 100)}%` }
+                ]} 
+              />
+            </View>
+            <Text style={styles.goalText}>
+              Meta: 10,000 pasos
+            </Text>
+          </View>
+        </ThemedView>
+
         {/* Resumen de salud */}
         <ThemedView style={[styles.card, { backgroundColor: colors.background }]}>
           <ThemedText type="subtitle" style={styles.cardTitle}>
             Resumen de Hoy
           </ThemedText>
           <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Ionicons name="footsteps" size={32} color={colors.tint} />
-              <ThemedText style={styles.statValue}>8,432</ThemedText>
-              <ThemedText style={styles.statLabel}>Pasos</ThemedText>
-            </View>
             <View style={styles.statItem}>
               <Ionicons name="heart" size={32} color="#FF6B6B" />
               <ThemedText style={styles.statValue}>72</ThemedText>
@@ -40,6 +73,11 @@ export default function SaludScreen() {
               <Ionicons name="flame" size={32} color="#FF9500" />
               <ThemedText style={styles.statValue}>420</ThemedText>
               <ThemedText style={styles.statLabel}>Calorías</ThemedText>
+            </View>
+            <View style={styles.statItem}>
+              <Ionicons name="speedometer" size={32} color="#4A90E2" />
+              <ThemedText style={styles.statValue}>5.2</ThemedText>
+              <ThemedText style={styles.statLabel}>km</ThemedText>
             </View>
           </View>
         </ThemedView>
@@ -98,6 +136,55 @@ const styles = StyleSheet.create({
     marginTop: 8,
     opacity: 0.7,
   },
+  stepsCard: {
+    margin: 16,
+    padding: 24,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  stepsContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 20,
+  },
+  stepsInfo: {
+    flex: 1,
+  },
+  stepsValue: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  stepsLabel: {
+    fontSize: 16,
+    color: '#fff',
+    opacity: 0.9,
+    marginTop: 4,
+  },
+  stepsGoal: {
+    gap: 8,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 4,
+  },
+  goalText: {
+    fontSize: 12,
+    color: '#fff',
+    opacity: 0.8,
+  },
   card: {
     margin: 16,
     padding: 20,
@@ -139,7 +226,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: 'rgba(128,128,128,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },

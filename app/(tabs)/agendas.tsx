@@ -4,7 +4,7 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function AgendasScreen() {
   const colorScheme = useColorScheme();
@@ -55,9 +55,9 @@ export default function AgendasScreen() {
           style={[styles.addButton, { backgroundColor: colors.tint }]}
         >
           <Ionicons name="add-circle-outline" size={24} color="#fff" />
-          <ThemedText style={styles.addButtonText}>
+          <Text style={styles.addButtonText}>
             Agendar Nueva Cita
-          </ThemedText>
+          </Text>
         </TouchableOpacity>
 
         {/* Lista de citas */}
