@@ -1,133 +1,100 @@
-import { APP_CONFIG } from '@/config/constants';
-import { logger } from '@/utils/logger';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-const { STORAGE_KEYS } = APP_CONFIG;
+const TOKEN_KEY = 'auth_token';
+const ID_TOKEN_KEY = 'id_token';
+const USER_KEY = 'user_data';
 
-/**
- * Guarda un valor en el almacenamiento seguro
- */
-async function setItem(key: string, value: string): Promise<void> {
-  if (Platform.OS === 'web') {
-    localStorage.setItem(key, value);
-  } else {
-    await SecureStore.setItemAsync(key, value);
-  }
-}
-
-/**
- * Obtiene un valor del almacenamiento seguro
- */
-async function getItem(key: string): Promise<string | null> {
-  if (Platform.OS === 'web') {
-    return localStorage.getItem(key);
-  }
-  return await SecureStore.getItemAsync(key);
-}
-
-/**
- * Elimina un valor del almacenamiento seguro
- */
-async function removeItem(key: string): Promise<void> {
-  if (Platform.OS === 'web') {
-    localStorage.removeItem(key);
-  } else {
-    await SecureStore.deleteItemAsync(key);
-  }
-}
-
-/**
- * Valida que un token sea válido
- */
-function validateToken(token: string, name: string): void {
-  if (!token || typeof token !== 'string') {
-    throw new Error(`${name} inválido`);
-  }
-}
-
-/**
- * Servicio de almacenamiento seguro para tokens y datos de usuario
- */
+// Almacenamiento seguro para tokens
 export const tokenStorage = {
-  /**
-   * Guarda los tokens de acceso e ID
-   */
   async saveTokens(accessToken: string, idToken: string): Promise<void> {
     try {
-      validateToken(accessToken, 'Access token');
-      validateToken(idToken, 'ID token');
+      // Validar que los tokens sean strings válidos
+      if (!accessToken || typeof accessToken !== 'string') {
+        throw new Error('Access token inválido');
+      }
+      if (!idToken || typeof idToken !== 'string') {
+        throw new Error('ID token inválido');
+      }
 
-      await setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-      await setItem(STORAGE_KEYS.ID_TOKEN, idToken);
-
-      logger.log('[Storage] Tokens guardados');
+      if (Platform.OS === 'web') {
+        localStorage.setItem(TOKEN_KEY, accessToken);
+        localStorage.setItem(ID_TOKEN_KEY, idToken);
+      } else {
+        await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+        await SecureStore.setItemAsync(ID_TOKEN_KEY, idToken);
+      }
+      console.log('[TokenStorage] Tokens guardados exitosamente');
     } catch (error) {
-      logger.error('[Storage] Error guardando tokens:', error);
+      console.error('[TokenStorage] Error guardando tokens:', error);
       throw error;
     }
   },
 
-  /**
-   * Obtiene el token de acceso
-   */
   async getAccessToken(): Promise<string | null> {
     try {
-      return await getItem(STORAGE_KEYS.ACCESS_TOKEN);
+      if (Platform.OS === 'web') {
+        return localStorage.getItem(TOKEN_KEY);
+      }
+      return await SecureStore.getItemAsync(TOKEN_KEY);
     } catch (error) {
-      logger.error('[Storage] Error obteniendo access token:', error);
+      console.error('Error obteniendo access token:', error);
       return null;
     }
   },
 
-  /**
-   * Obtiene el token de ID
-   */
   async getIdToken(): Promise<string | null> {
     try {
-      return await getItem(STORAGE_KEYS.ID_TOKEN);
+      if (Platform.OS === 'web') {
+        return localStorage.getItem(ID_TOKEN_KEY);
+      }
+      return await SecureStore.getItemAsync(ID_TOKEN_KEY);
     } catch (error) {
-      logger.error('[Storage] Error obteniendo ID token:', error);
+      console.error('Error obteniendo id token:', error);
       return null;
     }
   },
 
-  /**
-   * Elimina todos los tokens y datos de usuario
-   */
   async clearTokens(): Promise<void> {
     try {
-      await removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-      await removeItem(STORAGE_KEYS.ID_TOKEN);
-      await removeItem(STORAGE_KEYS.USER_DATA);
-      logger.log('[Storage] Tokens eliminados');
+      if (Platform.OS === 'web') {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(ID_TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+      } else {
+        await SecureStore.deleteItemAsync(TOKEN_KEY);
+        await SecureStore.deleteItemAsync(ID_TOKEN_KEY);
+        await SecureStore.deleteItemAsync(USER_KEY);
+      }
     } catch (error) {
-      logger.error('[Storage] Error limpiando tokens:', error);
+      console.error('Error limpiando tokens:', error);
     }
   },
 
-  /**
-   * Guarda los datos del usuario
-   */
   async saveUserData(userData: any): Promise<void> {
     try {
       const userString = JSON.stringify(userData);
-      await setItem(STORAGE_KEYS.USER_DATA, userString);
-      logger.log('[Storage] Datos de usuario guardados');
+      if (Platform.OS === 'web') {
+        localStorage.setItem(USER_KEY, userString);
+      } else {
+        await SecureStore.setItemAsync(USER_KEY, userString);
+      }
     } catch (error) {
-      logger.error('[Storage] Error guardando datos de usuario:', error);
+      console.error('Error guardando datos de usuario:', error);
     }
   },
 
-  /**
-   * Obtiene los datos del usuario
-   */
   async getUserData(): Promise<any | null> {
     try {
-      const userString = await getItem(STORAGE_KEYS.USER_DATA);
+      let userString: string | null;
+      if (Platform.OS === 'web') {
+        userString = localStorage.getItem(USER_KEY);
+      } else {
+        userString = await SecureStore.getItemAsync(USER_KEY);
+      }
       return userString ? JSON.parse(userString) : null;
     } catch (error) {
-      logger.error('[Storage] Error obteniendo datos de usuario:', error);
+      console.error('Error obteniendo datos de usuario:', error);
       return null;
     }
   },

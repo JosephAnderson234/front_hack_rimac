@@ -1,17 +1,24 @@
-import { APP_CONFIG } from '@/config/constants';
 import {
   AuthLoginResponse,
   AuthRegisterResponse,
   LoginRequest,
   RegisterRequest,
 } from '@/interfaces/auth';
-import { logger } from '@/utils/logger';
+import Constants from 'expo-constants';
 import { tokenStorage } from './storage';
 
-/**
- * Error personalizado para autenticación
- */
-export class AuthError extends Error {
+// En Expo, las variables de entorno se acceden desde Constants.expoConfig.extra
+const API_URL =
+  Constants.expoConfig?.extra?.EXPO_PUBLIC_AUTH_URL ||
+  process.env.EXPO_PUBLIC_AUTH_URL ||
+  'https://blkmrdvd75.execute-api.us-east-1.amazonaws.com/dev';
+
+console.log('[AuthService] Inicializando con API_URL:', API_URL);
+console.log('[AuthService] Constants.expoConfig?.extra:', Constants.expoConfig?.extra);
+console.log('[AuthService] process.env.EXPO_PUBLIC_AUTH_URL:', process.env.EXPO_PUBLIC_AUTH_URL);
+
+// Manejo de errores mejorado
+class AuthError extends Error {
   constructor(
     message: string,
     public statusCode?: number,
@@ -22,148 +29,142 @@ export class AuthError extends Error {
   }
 }
 
-/**
- * Procesa la respuesta HTTP y maneja errores
- */
+// Helper para manejar respuestas
 async function handleResponse<T>(response: Response): Promise<T> {
   const text = await response.text();
-  logger.log('[API] Respuesta recibida:', text.substring(0, 200));
-
-  let data: T;
+  console.log('[AuthService] Respuesta (texto):', text);
+  
+  let data;
   try {
     data = JSON.parse(text);
+    console.log('[AuthService] Respuesta parseada:', JSON.stringify(data, null, 2));
   } catch (e) {
-    throw new AuthError('Respuesta inválida del servidor', response.status);
+    throw new AuthError('La respuesta del servidor no es JSON válido', response.status);
   }
 
   if (!response.ok) {
-    const errorData = data as any;
     throw new AuthError(
-      errorData.error || errorData.message || `Error ${response.status}`,
+      data.error || data.message || `Error ${response.status}`,
       response.status,
       data
     );
   }
-
+  
   return data;
 }
 
-/**
- * Valida que la respuesta contenga los tokens necesarios
- */
-function validateTokens(result: any, action: string): void {
-  if (!result.access_token || !result.id_token) {
-    logger.error(`[API] Tokens faltantes en ${action}:`, Object.keys(result));
-    throw new AuthError(
-      `${action} exitoso pero el servidor no devolvió tokens válidos`
-    );
-  }
-}
-
-/**
- * Guarda los tokens y datos del usuario
- */
-async function saveAuthData(
-  accessToken: string,
-  idToken: string,
-  userData: { email: string; name?: string; role: string }
-): Promise<void> {
-  await tokenStorage.saveTokens(accessToken, idToken);
-  await tokenStorage.saveUserData(userData);
-  logger.log('[API] Datos de autenticación guardados');
-}
-
-/**
- * Inicia sesión con email y contraseña
- */
-export async function login(data: LoginRequest): Promise<AuthLoginResponse> {
-  logger.log('[API] Iniciando login para:', data.email);
-
+// Login
+export const login = async (data: LoginRequest): Promise<AuthLoginResponse> => {
+  console.log('[AuthService] Login request:', `${API_URL}/login`, data);
   try {
-    const response = await fetch(`${APP_CONFIG.API_URL}/login`, {
+    const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(data),
     });
+    console.log('[AuthService] Login status:', response.status);
 
     const result = await handleResponse<AuthLoginResponse>(response);
-    validateTokens(result, 'Login');
+    console.log('[AuthService] Login result:', result);
 
-    await saveAuthData(result.access_token, result.id_token, {
+    // Validar que los tokens existan
+    if (!result.access_token || !result.id_token) {
+      console.error('[AuthService] Tokens faltantes en respuesta:', result);
+      console.error('[AuthService] Campos disponibles:', Object.keys(result));
+      throw new AuthError(
+        'Login exitoso pero el servidor no devolvió tokens. ' +
+        'Verifica la configuración del backend.'
+      );
+    }
+
+    // Guardar tokens automáticamente
+    console.log('[AuthService] Guardando tokens...');
+    await tokenStorage.saveTokens(result.access_token, result.id_token);
+    await tokenStorage.saveUserData({
       email: result.email,
       role: result.role,
     });
 
-    logger.log('[API] Login exitoso');
     return result;
   } catch (error) {
-    logger.error('[API] Error en login:', error);
-    throw error instanceof AuthError ? error : new AuthError('Error de conexión');
+    console.error(`[AuthService] Error en ${API_URL}/login:`, error);
+    if (error instanceof AuthError) {
+      throw error;
+    }
+    throw new AuthError(`Error de conexión con ${API_URL}/login`);
   }
-}
+};
 
-/**
- * Registra un nuevo usuario
- */
-export async function register(
+// Registro
+export const register = async (
   data: RegisterRequest
-): Promise<AuthRegisterResponse> {
-  logger.log('[API] Iniciando registro para:', data.email);
-
+): Promise<AuthRegisterResponse> => {
+  console.log('[AuthService] Register request:', `${API_URL}/register`, data);
   try {
-    const response = await fetch(`${APP_CONFIG.API_URL}/register`, {
+    const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(data),
     });
+    console.log('[AuthService] Register status:', response.status);
 
     const result = await handleResponse<AuthRegisterResponse>(response);
-    validateTokens(result, 'Registro');
+    console.log('[AuthService] Register result:', result);
 
-    await saveAuthData(result.access_token, result.id_token, {
+    // Validar que los tokens existan
+    if (!result.access_token || !result.id_token) {
+      console.error('[AuthService] Tokens faltantes en respuesta:', result);
+      console.error('[AuthService] Campos disponibles:', Object.keys(result));
+      throw new AuthError(
+        'Registro exitoso pero el servidor no devolvió tokens. ' +
+        'Verifica la configuración del backend.'
+      );
+    }
+
+    // Guardar tokens automáticamente
+    console.log('[AuthService] Guardando tokens...');
+    await tokenStorage.saveTokens(result.access_token, result.id_token);
+    await tokenStorage.saveUserData({
       email: result.usuario.email,
       name: result.usuario.name,
       role: result.usuario.role,
     });
 
-    logger.log('[API] Registro exitoso');
     return result;
   } catch (error) {
-    logger.error('[API] Error en registro:', error);
-    throw error instanceof AuthError ? error : new AuthError('Error de conexión');
+    console.error(`[AuthService] Error en ${API_URL}/register:`, error);
+    if (error instanceof AuthError) {
+      throw error;
+    }
+    throw new AuthError(`Error de conexión con ${API_URL}/register`);
   }
-}
+};
 
-/**
- * Cierra la sesión del usuario
- */
-export async function logout(): Promise<void> {
+// Logout
+export const logout = async (): Promise<void> => {
   await tokenStorage.clearTokens();
-  logger.log('[API] Sesión cerrada');
-}
+};
 
-/**
- * Verifica si el usuario está autenticado
- */
-export async function isAuthenticated(): Promise<boolean> {
+// Verificar si está autenticado
+export const isAuthenticated = async (): Promise<boolean> => {
   const token = await tokenStorage.getAccessToken();
   return !!token;
-}
+};
 
-/**
- * Obtiene los datos del usuario actual
- */
-export async function getCurrentUser() {
+// Obtener usuario actual
+export const getCurrentUser = async () => {
   return await tokenStorage.getUserData();
-}
+};
 
-/**
- * Realiza una petición HTTP autenticada
- */
-export async function authenticatedFetch(
+// Helper para hacer peticiones autenticadas
+export const authenticatedFetch = async (
   url: string,
   options: RequestInit = {}
-): Promise<Response> {
+): Promise<Response> => {
   const token = await tokenStorage.getAccessToken();
 
   if (!token) {
@@ -178,4 +179,4 @@ export async function authenticatedFetch(
       'Content-Type': 'application/json',
     },
   });
-}
+};

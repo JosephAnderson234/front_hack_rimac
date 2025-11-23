@@ -1,43 +1,43 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
-import { useAuth } from '@/context/auth';
+import { useAuth } from '@/contexts/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { logger } from '@/utils/logger';
-import { validateLoginData } from '@/utils/validation';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
+    ActivityIndicator,
+    Alert,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
 } from 'react-native';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
   const { login } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
   const handleLogin = async () => {
-    // Validar datos
-    const validation = validateLoginData(email, password);
-    if (!validation.isValid) {
-      Alert.alert('Error', validation.error);
+    if (!email || !password) {
+      Alert.alert('Error', 'Por favor completa todos los campos');
       return;
     }
 
+    console.log('[LoginForm] Iniciando login con:', { email });
     setIsLoading(true);
     try {
       await login({ email, password });
-      logger.log('[LoginForm] Login exitoso');
+      console.log('[LoginForm] Login exitoso');
+      // El layout se encargará de la redirección automáticamente
     } catch (error: any) {
-      logger.error('[LoginForm] Error:', error);
-      Alert.alert('Error', error.message || 'Error al iniciar sesión');
+      console.error('[LoginForm] Error en login:', error);
+      Alert.alert(
+        'Error',
+        error.message || 'Error al iniciar sesión. Verifica tus credenciales.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -45,8 +45,15 @@ export function LoginForm() {
 
   return (
     <ThemedView style={styles.container}>
+      <ThemedText type="title" style={styles.title}>
+        Iniciar Sesión
+      </ThemedText>
+
       <TextInput
-        style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
+        style={[
+          styles.input,
+          { borderColor: colors.icon, color: colors.text },
+        ]}
         placeholder="Email"
         placeholderTextColor={colors.icon}
         value={email}
@@ -54,18 +61,19 @@ export function LoginForm() {
         autoCapitalize="none"
         keyboardType="email-address"
         editable={!isLoading}
-        autoComplete="email"
       />
 
       <TextInput
-        style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
+        style={[
+          styles.input,
+          { borderColor: colors.icon, color: colors.text },
+        ]}
         placeholder="Contraseña"
         placeholderTextColor={colors.icon}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         editable={!isLoading}
-        autoComplete="password"
       />
 
       <TouchableOpacity
@@ -87,6 +95,10 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     gap: 16,
+  },
+  title: {
+    marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
     borderWidth: 1,
