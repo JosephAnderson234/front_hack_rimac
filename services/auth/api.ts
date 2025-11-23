@@ -167,12 +167,12 @@ export const authenticatedFetch = async (
   url: string,
   options: RequestInit = {}
 ): Promise<Response> => {
-  const token = await tokenStorage.getAccessToken();
+  const token = await tokenStorage.getIdToken();
 
   if (!token) {
     throw new AuthError('No autenticado', 401);
   }
-
+  console.log(token)
   return fetch(url, {
     ...options,
     headers: {
