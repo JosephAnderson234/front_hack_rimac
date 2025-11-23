@@ -1,10 +1,10 @@
 import { LoginRequest, RegisterRequest } from '@/interfaces/auth';
 import {
-    login as apiLogin,
-    logout as apiLogout,
-    register as apiRegister,
-    getCurrentUser,
-    isAuthenticated,
+  login as apiLogin,
+  logout as apiLogout,
+  register as apiRegister,
+  getCurrentUser,
+  isAuthenticated,
 } from '@/services/auth';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
@@ -22,7 +22,7 @@ interface AuthContextType {
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
-  updateUserRole: (newRole: string) => void;
+  updateUserRole: (newRole: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -82,9 +82,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
-  const updateUserRole = (newRole: string) => {
+  const updateUserRole = async (newRole: string) => {
     if (user) {
-      setUser({ ...user, rol: newRole });
+      const updatedUser = { ...user, rol: newRole };
+      setUser(updatedUser);
+      
+      // Guardar en localStorage
+      const { tokenStorage } = await import('@/services/auth/storage');
+      await tokenStorage.saveUserData(updatedUser);
+      console.log('[AuthContext] Rol actualizado y guardado:', newRole);
     }
   };
 

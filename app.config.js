@@ -1,45 +1,45 @@
 export default {
   expo: {
-    name: 'counter_pasos',
-    slug: 'counter_pasos',
-    version: '1.0.0',
-    orientation: 'portrait',
-    icon: './assets/images/icon.png',
-    scheme: 'healtec',
-    userInterfaceStyle: 'automatic',
+    name: "counter_pasos",
+    slug: "counter_pasos",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/images/icon.png",
+    scheme: "healtec",
+    userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.yourcompany.healtec',
-      googleServicesFile: './google-services.json'
+      bundleIdentifier: "com.yourcompany.healtec",
+      googleServicesFile: "./google-services.json",
     },
     android: {
-      package: 'com.yourcompany.healtec',
-      googleServicesFile: './google-services.json',
+      package: "com.yourcompany.healtec",
+      googleServicesFile: "./google-services.json",
       adaptiveIcon: {
-        backgroundColor: '#E6F4FE',
-        foregroundImage: './assets/images/android-icon-foreground.png',
-        backgroundImage: './assets/images/android-icon-background.png',
-        monochromeImage: './assets/images/android-icon-monochrome.png',
+        backgroundColor: "#E6F4FE",
+        foregroundImage: "./assets/images/android-icon-foreground.png",
+        backgroundImage: "./assets/images/android-icon-background.png",
+        monochromeImage: "./assets/images/android-icon-monochrome.png",
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
     },
     web: {
-      output: 'static',
-      favicon: './assets/images/favicon.png',
+      output: "static",
+      favicon: "./assets/images/favicon.png",
     },
     plugins: [
-      'expo-router',
+      "expo-router",
       [
-        'expo-splash-screen',
+        "expo-splash-screen",
         {
-          image: './assets/images/splash-icon.png',
+          image: "./assets/images/splash-icon.png",
           imageWidth: 200,
-          resizeMode: 'contain',
-          backgroundColor: '#ffffff',
+          resizeMode: "contain",
+          backgroundColor: "#ffffff",
           dark: {
-            backgroundColor: '#000000',
+            backgroundColor: "#000000",
           },
         },
       ],
@@ -48,28 +48,27 @@ export default {
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.png", // Icono blanco transparente
-          "color": "#ffffff",
-          "defaultChannel": "default"
-        }
+          icon: "./assets/notification-icon.png", // Icono blanco transparente
+          color: "#ffffff",
+          defaultChannel: "default",
+        },
       ],
       [
         "expo-build-properties",
         {
-          "android": {
-            "useAndroidX": true
-          }
-        }
-      ]
+          android: {
+            useAndroidX: true,
+          },
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,
       reactCompiler: true,
     },
     extra: {
-      EXPO_PUBLIC_AUTH_URL:
-        process.env.EXPO_PUBLIC_AUTH_URL ||
-        'https://blkmrdvd75.execute-api.us-east-1.amazonaws.com/dev',
+      EXPO_PUBLIC_AUTH_URL: process.env.EXPO_PUBLIC_AUTH_URL,
+      EXPO_PUBLIC_RECETAS_URL: process.env.EXPO_PUBLIC_RECETAS_URL,
     },
   },
 };

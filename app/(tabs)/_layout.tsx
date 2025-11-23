@@ -51,6 +51,21 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="recetas"
+        options={{
+          title: 'Recetas',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="doc.text.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="receta-detalle"
+        options={{
+          title: 'Detalle de Receta',
+          href: null, // Esto oculta la tab de la barra inferior
+          headerShown: false, // Oculta el header
+        }}
+      />
+      <Tabs.Screen
         name="perfil"
         options={{
           title: 'Perfil',
