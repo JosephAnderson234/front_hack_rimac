@@ -7,45 +7,201 @@ import { Accelerometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+interface MovementRecord {
+  timestamp: number;
+}
+
+interface SleepSession {
+  startTime: Date | null;
+  endTime: Date | null;
+  duration: number; // en minutos
+  quality: 'poor' | 'fair' | 'good' | 'excellent';
+}
+
+type SleepState = 'monitoring' | 'sleeping' | 'awake';
+
 export default function SaludScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [steps, setSteps] = useState(0);
   const [isAvailable, setIsAvailable] = useState(true);
 
+  // Estados de sueño
+  const [sleepState, setSleepState] = useState<SleepState>('monitoring');
+  const [sleepSession, setSleepSession] = useState<SleepSession>({
+    startTime: null,
+    endTime: null,
+    duration: 0,
+    quality: 'fair',
+  });
+  const [movementCount, setMovementCount] = useState(0);
+
   // Referencias para el algoritmo de detección de pasos
   const lastMagnitude = useRef(0);
   const lastStepTime = useRef(0);
-  const stepThreshold = useRef(0.8); // Umbral de aceleración para detectar un paso
-  const minStepInterval = useRef(200); // Mínimo 200ms entre pasos
+  const stepThreshold = useRef(0.8);
+  const minStepInterval = useRef(200);
 
+  // Referencias para detección de sueño
+  const movementHistory = useRef<MovementRecord[]>([]);
+  const potentialSleepStart = useRef<Date | null>(null);
+  const lastWakeCheck = useRef<Date>(new Date());
+  const sleepStateRef = useRef<SleepState>('monitoring');
+  const movementThreshold = useRef(0.3);
+
+  // Limpiar movimientos antiguos
+  const cleanOldMovements = () => {
+    const threeHoursAgo = Date.now() - (3 * 60 * 60 * 1000);
+    movementHistory.current = movementHistory.current.filter(m => m.timestamp > threeHoursAgo);
+  };
+
+  // Detectar inicio de sueño
+  const checkForSleepStart = () => {
+    if (sleepStateRef.current !== 'monitoring') return;
+
+    const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
+    const movementsInLast2Hours = movementHistory.current.filter(m => m.timestamp >= twoHoursAgo).length;
+
+    if (movementHistory.current.length === 0 || movementHistory.current[0].timestamp > twoHoursAgo - (30 * 60 * 1000)) {
+      return;
+    }
+
+    const movementsPerHour = movementsInLast2Hours / 2;
+
+    if (movementsPerHour < 5) {
+      if (!potentialSleepStart.current) {
+        const firstMovementInWindow = movementHistory.current.find(m => m.timestamp >= twoHoursAgo);
+        potentialSleepStart.current = firstMovementInWindow 
+          ? new Date(firstMovementInWindow.timestamp)
+          : new Date(twoHoursAgo);
+      }
+
+      const timeSincePotentialStart = Date.now() - potentialSleepStart.current.getTime();
+      if (timeSincePotentialStart >= 2 * 60 * 60 * 1000) {
+        const actualSleepStart = potentialSleepStart.current;
+        setSleepSession(prev => {
+          if (!prev.startTime) {
+            const currentDuration = Math.floor((Date.now() - actualSleepStart.getTime()) / 60000);
+            return {
+              ...prev,
+              startTime: actualSleepStart,
+              endTime: null,
+              duration: currentDuration,
+            };
+          }
+          return prev;
+        });
+        setMovementCount(0);
+        setSleepState('sleeping');
+        sleepStateRef.current = 'sleeping';
+      }
+    } else {
+      potentialSleepStart.current = null;
+    }
+  };
+
+  // Detectar despertar
+  const checkForWakeUp = () => {
+    if (sleepStateRef.current !== 'sleeping') return;
+
+    const now = Date.now();
+    const thirtyMinutesAgo = now - (30 * 60 * 1000);
+    const recentMovements = movementHistory.current.filter(m => m.timestamp >= thirtyMinutesAgo).length;
+
+    if (recentMovements > 10) {
+      const timeSinceLastCheck = now - lastWakeCheck.current.getTime();
+      if (timeSinceLastCheck >= 5 * 60 * 1000) {
+        setSleepSession(prev => {
+          const endTime = new Date();
+          const startTime = prev.startTime || new Date();
+          const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 60000);
+
+          const movementsPerHour = duration > 0 ? (movementCount / duration) * 60 : movementCount;
+          let quality: 'poor' | 'fair' | 'good' | 'excellent' = 'fair';
+          if (movementsPerHour < 5) quality = 'excellent';
+          else if (movementsPerHour < 10) quality = 'good';
+          else if (movementsPerHour < 20) quality = 'fair';
+          else quality = 'poor';
+
+          return {
+            ...prev,
+            endTime,
+            duration,
+            quality,
+          };
+        });
+        potentialSleepStart.current = null;
+        movementHistory.current = [];
+        setMovementCount(0);
+        setSleepState('awake');
+        sleepStateRef.current = 'awake';
+      }
+    } else {
+      lastWakeCheck.current = new Date();
+    }
+  };
+
+  // Timer para actualizar duración y verificar estado de sueño
+  useEffect(() => {
+    const timer = setInterval(() => {
+      cleanOldMovements();
+      
+      if (sleepState === 'sleeping' && sleepSession.startTime) {
+        const now = new Date();
+        const durationInMinutes = Math.floor((now.getTime() - sleepSession.startTime.getTime()) / 60000);
+        setSleepSession(prev => {
+          if (prev.duration !== durationInMinutes) {
+            return { ...prev, duration: durationInMinutes };
+          }
+          return prev;
+        });
+      }
+
+      checkForSleepStart();
+      checkForWakeUp();
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [sleepState, sleepSession.startTime, movementCount]);
+
+  // Sincronizar ref con estado
+  useEffect(() => {
+    sleepStateRef.current = sleepState;
+  }, [sleepState]);
+
+  // Acelerómetro
   useEffect(() => {
     const subscribe = async () => {
       const available = await Accelerometer.isAvailableAsync();
       setIsAvailable(available);
 
       if (available) {
-        // Configurar frecuencia de actualización (10 veces por segundo)
-        Accelerometer.setUpdateInterval(100);
+        Accelerometer.setUpdateInterval(1000); // 1 segundo para ambos
 
-        // Suscribirse a los datos del acelerómetro
         const subscription = Accelerometer.addListener(accelerometerData => {
           const { x, y, z } = accelerometerData;
-
-          // Calcular la magnitud del vector de aceleración
           const magnitude = Math.sqrt(x * x + y * y + z * z);
 
-          // Detectar pico de aceleración (paso)
+          // Detectar pasos
           const currentTime = Date.now();
           const timeSinceLastStep = currentTime - lastStepTime.current;
 
-          // Si hay un cambio significativo en la aceleración y ha pasado suficiente tiempo
           if (
             Math.abs(magnitude - lastMagnitude.current) > stepThreshold.current &&
             timeSinceLastStep > minStepInterval.current
           ) {
             setSteps(prevSteps => prevSteps + 1);
             lastStepTime.current = currentTime;
+          }
+
+          // Detectar movimientos para sueño
+          if (Math.abs(magnitude - lastMagnitude.current) > movementThreshold.current) {
+            const now = Date.now();
+            movementHistory.current.push({ timestamp: now });
+
+            if (sleepStateRef.current === 'sleeping') {
+              setMovementCount(prev => prev + 1);
+            }
           }
 
           lastMagnitude.current = magnitude;
@@ -162,12 +318,55 @@ export default function SaludScreen() {
               </View>
             </View>
             <View style={styles.metricItem}>
-              <View style={styles.metricIcon}>
+              <View style={[
+                styles.metricIcon,
+                sleepState === 'sleeping' && { backgroundColor: 'rgba(155, 89, 182, 0.2)' }
+              ]}>
                 <Ionicons name="moon" size={24} color="#9B59B6" />
               </View>
               <View style={styles.metricInfo}>
-                <ThemedText style={styles.metricName}>Sueño</ThemedText>
-                <ThemedText style={styles.metricValue}>7h 30min</ThemedText>
+                <View style={styles.metricHeader}>
+                  <ThemedText style={styles.metricName}>Sueño</ThemedText>
+                  {sleepState === 'sleeping' && (
+                    <View style={styles.sleepingBadge}>
+                      <View style={styles.sleepingDot} />
+                      <Text style={styles.sleepingText}>Durmiendo</Text>
+                    </View>
+                  )}
+                </View>
+                <ThemedText style={styles.metricValue}>
+                  {sleepSession.duration > 0 
+                    ? `${Math.floor(sleepSession.duration / 60)}h ${sleepSession.duration % 60}m`
+                    : sleepState === 'monitoring' 
+                      ? 'Monitoreando...'
+                      : '0h 0m'
+                  }
+                </ThemedText>
+                {sleepSession.endTime && sleepSession.quality && (
+                  <View style={styles.qualityBadge}>
+                    <Ionicons 
+                      name="star" 
+                      size={12} 
+                      color={
+                        sleepSession.quality === 'excellent' ? '#4CAF50' :
+                        sleepSession.quality === 'good' ? '#8BC34A' :
+                        sleepSession.quality === 'fair' ? '#FFC107' : '#F44336'
+                      } 
+                    />
+                    <Text style={[
+                      styles.qualityText,
+                      { color: 
+                        sleepSession.quality === 'excellent' ? '#4CAF50' :
+                        sleepSession.quality === 'good' ? '#8BC34A' :
+                        sleepSession.quality === 'fair' ? '#FFC107' : '#F44336'
+                      }
+                    ]}>
+                      {sleepSession.quality === 'excellent' ? 'Excelente' :
+                       sleepSession.quality === 'good' ? 'Buena' :
+                       sleepSession.quality === 'fair' ? 'Regular' : 'Pobre'}
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
             <View style={styles.metricItem}>
@@ -323,5 +522,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.7,
     marginTop: 4,
+  },
+  metricHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sleepingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(155, 89, 182, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  sleepingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#9B59B6',
+  },
+  sleepingText: {
+    fontSize: 10,
+    color: '#9B59B6',
+    fontWeight: '600',
+  },
+  qualityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  qualityText: {
+    fontSize: 11,
+    fontWeight: '600',
   },
 });
