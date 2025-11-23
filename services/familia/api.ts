@@ -91,11 +91,17 @@ export const listarDependientes = async (): Promise<ListarDependientesResponse> 
 export const agregarDependiente = async (
   data: AgregarDependienteRequest
 ): Promise<AgregarDependienteResponse> => {
-  console.log('[FamiliaService] Agregar dependiente request:', `${API_URL_FAMILIA}/agregar-dependiente`, data);
+  // Crear una copia sin correo_tutor para que el backend lo tome del token
+  const { correo_tutor, ...dataWithoutEmail } = data;
+  
+  console.log('[FamiliaService] Agregar dependiente request:', `${API_URL_FAMILIA}/agregar-dependiente`);
+  console.log('[FamiliaService] Data original:', data);
+  console.log('[FamiliaService] Data a enviar (sin correo_tutor):', dataWithoutEmail);
+  
   try {
     const response = await authenticatedFetch(`${API_URL_FAMILIA}/agregar-dependiente`, {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(dataWithoutEmail),
     });
     console.log('[FamiliaService] Agregar dependiente status:', response.status);
 

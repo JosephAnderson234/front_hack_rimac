@@ -75,6 +75,9 @@ export default function FamiliaScreen() {
             return;
         }
 
+        console.log('[FamiliaScreen] Usuario actual:', user);
+        console.log('[FamiliaScreen] Correo a enviar:', user?.correo);
+
         try {
             setLoading(true);
             const response = await agregarDependiente({
