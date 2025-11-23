@@ -3,25 +3,62 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Accelerometer } from 'expo-sensors';
+import React, { useEffect, useRef, useState } from 'react';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function SaludScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [steps, setSteps] = useState(0);
+  const [isAvailable, setIsAvailable] = useState(true);
 
-  // Simulación de contador de pasos (en producción usarías un sensor real)
+  // Referencias para el algoritmo de detección de pasos
+  const lastMagnitude = useRef(0);
+  const lastStepTime = useRef(0);
+  const stepThreshold = useRef(0.8); // Umbral de aceleración para detectar un paso
+  const minStepInterval = useRef(200); // Mínimo 200ms entre pasos
+
   useEffect(() => {
-    // Iniciar con un valor base
-    setSteps(8432);
-    
-    // Simular incremento de pasos cada 5 segundos
-    const interval = setInterval(() => {
-      setSteps(prev => prev + Math.floor(Math.random() * 10));
-    }, 5000);
+    const subscribe = async () => {
+      const available = await Accelerometer.isAvailableAsync();
+      setIsAvailable(available);
 
-    return () => clearInterval(interval);
+      if (available) {
+        // Configurar frecuencia de actualización (10 veces por segundo)
+        Accelerometer.setUpdateInterval(100);
+
+        // Suscribirse a los datos del acelerómetro
+        const subscription = Accelerometer.addListener(accelerometerData => {
+          const { x, y, z } = accelerometerData;
+
+          // Calcular la magnitud del vector de aceleración
+          const magnitude = Math.sqrt(x * x + y * y + z * z);
+
+          // Detectar pico de aceleración (paso)
+          const currentTime = Date.now();
+          const timeSinceLastStep = currentTime - lastStepTime.current;
+
+          // Si hay un cambio significativo en la aceleración y ha pasado suficiente tiempo
+          if (
+            Math.abs(magnitude - lastMagnitude.current) > stepThreshold.current &&
+            timeSinceLastStep > minStepInterval.current
+          ) {
+            setSteps(prevSteps => prevSteps + 1);
+            lastStepTime.current = currentTime;
+          }
+
+          lastMagnitude.current = magnitude;
+        });
+
+        return subscription;
+      }
+    };
+
+    const subscription = subscribe();
+    return () => {
+      subscription.then(sub => sub && sub.remove());
+    };
   }, []);
 
   return (
@@ -36,27 +73,54 @@ export default function SaludScreen() {
 
         {/* Contador de Pasos Principal */}
         <ThemedView style={[styles.stepsCard, { backgroundColor: colors.tint }]}>
-          <View style={styles.stepsContent}>
-            <Ionicons name="footsteps" size={48} color="#fff" />
-            <View style={styles.stepsInfo}>
-              <Text style={styles.stepsValue}>{steps.toLocaleString()}</Text>
-              <Text style={styles.stepsLabel}>Pasos Hoy</Text>
+          {!isAvailable && Platform.OS !== 'web' ? (
+            <View style={styles.stepsUnavailable}>
+              <Ionicons name="alert-circle-outline" size={48} color="#fff" />
+              <Text style={styles.unavailableText}>
+                Acelerómetro no disponible
+              </Text>
+              <Text style={styles.unavailableSubtext}>
+                El contador de pasos requiere un acelerómetro
+              </Text>
             </View>
-          </View>
-          <View style={styles.stepsGoal}>
-            <View style={styles.progressBar}>
-              <View 
-                style={[
-                  styles.progressFill, 
-                  { width: `${Math.min((steps / 10000) * 100, 100)}%` }
-                ]} 
-              />
+          ) : Platform.OS === 'web' ? (
+            <View style={styles.stepsUnavailable}>
+              <Ionicons name="information-circle-outline" size={48} color="#fff" />
+              <Text style={styles.unavailableText}>
+                No disponible en web
+              </Text>
+              <Text style={styles.unavailableSubtext}>
+                Usa la app móvil para contar pasos
+              </Text>
             </View>
-            <Text style={styles.goalText}>
-              Meta: 10,000 pasos
-            </Text>
-          </View>
+          ) : (
+            <>
+              <View style={styles.stepsContent}>
+                <Ionicons name="footsteps" size={48} color="#fff" />
+                <View style={styles.stepsInfo}>
+                  <Text style={styles.stepsValue}>{steps.toLocaleString()}</Text>
+                  <Text style={styles.stepsLabel}>Pasos Hoy</Text>
+                </View>
+              </View>
+              <View style={styles.stepsGoal}>
+                <View style={styles.progressBar}>
+                  <View 
+                    style={[
+                      styles.progressFill, 
+                      { width: `${Math.min((steps / 10000) * 100, 100)}%` }
+                    ]} 
+                  />
+                </View>
+                <Text style={styles.goalText}>
+                  Meta: 10,000 pasos
+                </Text>
+              </View>
+            </>
+          )}
         </ThemedView>
+
+
+
 
         {/* Resumen de salud */}
         <ThemedView style={[styles.card, { backgroundColor: colors.background }]}>
@@ -158,11 +222,11 @@ const styles = StyleSheet.create({
   stepsValue: {
     fontSize: 40,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000',
   },
   stepsLabel: {
     fontSize: 16,
-    color: '#fff',
+    color: '#000',
     opacity: 0.9,
     marginTop: 4,
   },
@@ -171,19 +235,37 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 8,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: 'rgba(152, 178, 249, 0.94)',
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
     borderRadius: 4,
   },
   goalText: {
     fontSize: 12,
     color: '#fff',
     opacity: 0.8,
+  },
+  stepsUnavailable: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    gap: 12,
+  },
+  unavailableText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+    textAlign: 'center',
+  },
+  unavailableSubtext: {
+    fontSize: 14,
+    color: '#000',
+    opacity: 0.8,
+    textAlign: 'center',
   },
   card: {
     margin: 16,
