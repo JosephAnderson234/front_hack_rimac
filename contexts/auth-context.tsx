@@ -1,10 +1,10 @@
 import { LoginRequest, RegisterRequest } from '@/interfaces/auth';
 import {
-  login as apiLogin,
-  logout as apiLogout,
-  register as apiRegister,
-  getCurrentUser,
-  isAuthenticated,
+    login as apiLogin,
+    logout as apiLogout,
+    register as apiRegister,
+    getCurrentUser,
+    isAuthenticated,
 } from '@/services/auth';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
@@ -22,6 +22,7 @@ interface AuthContextType {
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
+  updateUserRole: (newRole: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -81,6 +82,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
+  const updateUserRole = (newRole: string) => {
+    if (user) {
+      setUser({ ...user, rol: newRole });
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -90,6 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
+        updateUserRole,
       }}
     >
       {children}
