@@ -5,6 +5,7 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -35,6 +36,13 @@ export default function TabLayout() {
         options={{
           title: 'Pasos',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="figure.walk" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="sleep"
+        options={{
+          title: 'Sueño',
+          tabBarIcon: ({ color }) => <MaterialIcons name="bedtime" size={28} color={color} />,
         }}
       />
       <Tabs.Screen
