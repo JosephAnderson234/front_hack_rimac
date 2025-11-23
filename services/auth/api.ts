@@ -57,12 +57,18 @@ async function handleResponse<T>(response: Response): Promise<T> {
 export const login = async (data: LoginRequest): Promise<AuthLoginResponse> => {
   console.log('[AuthService] Login request:', `${API_URL}/login`, data);
   try {
+    // Mapear campos al formato que espera el backend
+    const requestBody = {
+      correo: data.email,
+      contrasena: data.password,
+    };
+    
     const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(requestBody),
     });
     console.log('[AuthService] Login status:', response.status);
 
@@ -103,12 +109,29 @@ export const register = async (
 ): Promise<AuthRegisterResponse> => {
   console.log('[AuthService] Register request:', `${API_URL}/register`, data);
   try {
+    // Mapear campos al formato que espera el backend
+    const requestBody: any = {
+      correo: data.email,
+      contrasena: data.password,
+      nombre: data.name,
+    };
+    
+    // Mapear sexo al formato que espera el backend (M o F)
+    if (data.sexo) {
+      const sexoMap: { [key: string]: string } = {
+        'masculino': 'M',
+        'femenino': 'F',
+        'otro': 'M', // Por defecto M si es "otro"
+      };
+      requestBody.sexo = sexoMap[data.sexo.toLowerCase()] || 'M';
+    }
+    
     const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(requestBody),
     });
     console.log('[AuthService] Register status:', response.status);
 

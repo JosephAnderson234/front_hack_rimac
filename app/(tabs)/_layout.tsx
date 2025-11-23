@@ -38,6 +38,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="sleep"
+        options={{
+          title: 'Sueño',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="moon.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="auth"
         options={{
           title: 'Perfil',
