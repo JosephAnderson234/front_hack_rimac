@@ -1,5 +1,4 @@
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,28 +32,28 @@ export default function TabLayout() {
         name="salud"
         options={{
           title: 'Salud',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="heart.fill" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="heart" size={28} color={color} />,
         }}
       />
       <Tabs.Screen
         name="familia"
         options={{
           title: 'Familia',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.3.fill" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="people" size={28} color={color} />,
         }}
       />
       <Tabs.Screen
         name="agendas"
         options={{
           title: 'Agendas',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="calendar" size={28} color={color} />,
         }}
       />
       <Tabs.Screen
         name="recetas"
         options={{
           title: 'Recetas',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="doc.text.fill" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="document-text" size={28} color={color} />,
         }}
       />
       <Tabs.Screen

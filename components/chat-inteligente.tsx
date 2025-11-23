@@ -1,3 +1,4 @@
+import { MarkdownRenderer } from '@/components/markdown-renderer';
 import { ThemedText } from '@/components/themed-text';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -17,7 +18,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Markdown from 'react-native-markdown-display';
 
 interface Mensaje {
   id: string;
@@ -265,122 +265,11 @@ export function ChatInteligente({ visible, onClose, contextoInicial }: ChatIntel
                     {mensaje.texto}
                   </Text>
                 ) : (
-                  <Markdown
-                    style={{
-                      body: {
-                        color: colors.text.primary,
-                        fontSize: 16,
-                        lineHeight: 22,
-                      },
-                      heading1: {
-                        color: colors.text.primary,
-                        fontSize: 24,
-                        fontWeight: '700',
-                        marginBottom: 8,
-                      },
-                      heading2: {
-                        color: colors.text.primary,
-                        fontSize: 20,
-                        fontWeight: '700',
-                        marginBottom: 6,
-                      },
-                      heading3: {
-                        color: colors.text.primary,
-                        fontSize: 18,
-                        fontWeight: '600',
-                        marginBottom: 4,
-                      },
-                      paragraph: {
-                        color: colors.text.primary,
-                        fontSize: 16,
-                        lineHeight: 22,
-                        marginBottom: 8,
-                      },
-                      strong: {
-                        fontWeight: '700',
-                      },
-                      em: {
-                        fontStyle: 'italic',
-                      },
-                      bullet_list: {
-                        marginBottom: 8,
-                      },
-                      ordered_list: {
-                        marginBottom: 8,
-                      },
-                      list_item: {
-                        color: colors.text.primary,
-                        fontSize: 16,
-                        lineHeight: 22,
-                        marginBottom: 4,
-                      },
-                      code_inline: {
-                        backgroundColor: 'rgba(128,128,128,0.3)',
-                        color: colors.text.primary,
-                        paddingHorizontal: 6,
-                        paddingVertical: 2,
-                        borderRadius: 4,
-                        fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-                      },
-                      code_block: {
-                        backgroundColor: 'rgba(128,128,128,0.3)',
-                        color: colors.text.primary,
-                        padding: 12,
-                        borderRadius: 8,
-                        marginBottom: 8,
-                        fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-                      },
-                      fence: {
-                        backgroundColor: 'rgba(128,128,128,0.3)',
-                        color: colors.text.primary,
-                        padding: 12,
-                        borderRadius: 8,
-                        marginBottom: 8,
-                        fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-                      },
-                      blockquote: {
-                        backgroundColor: 'rgba(128,128,128,0.2)',
-                        borderLeftWidth: 4,
-                        borderLeftColor: colors.tint,
-                        paddingLeft: 12,
-                        paddingVertical: 8,
-                        marginBottom: 8,
-                      },
-                      link: {
-                        color: colors.tint,
-                        textDecorationLine: 'underline',
-                      },
-                      hr: {
-                        backgroundColor: 'rgba(128,128,128,0.3)',
-                        height: 1,
-                        marginVertical: 12,
-                      },
-                      table: {
-                        borderWidth: 1,
-                        borderColor: 'rgba(128,128,128,0.3)',
-                        borderRadius: 8,
-                        marginBottom: 8,
-                      },
-                      thead: {
-                        backgroundColor: 'rgba(128,128,128,0.2)',
-                      },
-                      th: {
-                        color: colors.text.primary,
-                        fontWeight: '700',
-                        padding: 8,
-                        borderWidth: 1,
-                        borderColor: 'rgba(128,128,128,0.3)',
-                      },
-                      td: {
-                        color: colors.text.primary,
-                        padding: 8,
-                        borderWidth: 1,
-                        borderColor: 'rgba(128,128,128,0.3)',
-                      },
-                    }}
-                  >
-                    {mensaje.texto}
-                  </Markdown>
+                  <MarkdownRenderer
+                    content={mensaje.texto}
+                    textColor={colors.text.primary}
+                    linkColor={colors.tint}
+                  />
                 )}
                 <Text
                   style={[
