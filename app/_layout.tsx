@@ -22,23 +22,38 @@ function RootLayoutNav() {
   const rootNavigationState = useRootNavigationState();
 
   useEffect(() => {
-    if (isLoading) return;
-    if (!rootNavigationState?.key) return;
+    // Esperar a que termine de cargar la autenticación
+    if (isLoading) {
+      console.log('[RootLayout] Cargando autenticación...');
+      return;
+    }
+    
+    // Esperar a que la navegación esté lista
+    if (!rootNavigationState?.key) {
+      console.log('[RootLayout] Navegación no lista...');
+      return;
+    }
 
     console.log('[RootLayout] User:', user);
     console.log('[RootLayout] Segments:', segments);
 
     const inAuthScreens = segments[0] === 'sign-in' || segments[0] === 'sign-up';
+    const inTabs = segments[0] === '(tabs)';
 
     // Si no está autenticado y no está en pantallas de auth, redirigir a sign-in
     if (!user && !inAuthScreens) {
       console.log('[RootLayout] No autenticado, redirigiendo a sign-in...');
       router.replace('/sign-in');
     }
-    // Si está autenticado y está en pantallas de auth, redirigir a tabs
+    // Si está autenticado y está en pantallas de auth, redirigir a salud
     else if (user && inAuthScreens) {
-      console.log('[RootLayout] Autenticado, redirigiendo a tabs...');
-      router.replace('/(tabs)');
+      console.log('[RootLayout] Autenticado en pantalla de auth, redirigiendo a salud...');
+      router.replace('/(tabs)/salud');
+    }
+    // Si está autenticado pero no está en ninguna pantalla específica (app recién abierta)
+    else if (user && !inTabs && !inAuthScreens) {
+      console.log('[RootLayout] Autenticado al abrir app, redirigiendo a salud...');
+      router.replace('/(tabs)/salud');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, segments, isLoading, rootNavigationState?.key]);
