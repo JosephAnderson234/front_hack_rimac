@@ -1,3 +1,4 @@
+import { ChatInteligente } from '@/components/chat-inteligente';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
@@ -29,6 +30,7 @@ export default function RecetasScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [chatVisible, setChatVisible] = useState(false);
 
   const loadRecetas = async () => {
     try {
@@ -136,6 +138,27 @@ export default function RecetasScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      {/* Botón flotante */}
+      <TouchableOpacity
+        style={[styles.floatingButton, { backgroundColor: colors.tint }]}
+        onPress={() => {
+          console.log('[RecetasScreen] Abriendo chat con contexto: Receta');
+          setChatVisible(true);
+        }}
+      >
+        <Ionicons name="chatbubbles" size={28} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Chat inteligente */}
+      <ChatInteligente
+        visible={chatVisible}
+        onClose={() => {
+          console.log('[RecetasScreen] Cerrando chat');
+          setChatVisible(false);
+        }}
+        contextoInicial="Receta"
+      />
+
       <ScrollView
         style={styles.scrollView}
         refreshControl={
@@ -168,7 +191,7 @@ export default function RecetasScreen() {
         {/* Lista de recetas */}
         {recetas.length === 0 ? (
           <ThemedView style={styles.emptyContainer}>
-            <Ionicons name="document-text-outline" size={64} color={colors.icon} />
+            <Ionicons name="document-text-outline" size={64} color={colors.icon.default} />
             <ThemedText style={styles.emptyText}>No tienes recetas</ThemedText>
             <ThemedText style={styles.emptySubtext}>
               Sube tu primera receta médica para comenzar
@@ -280,7 +303,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   uploadButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -293,10 +316,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
+    color: '#FFFFFF',
   },
   emptySubtext: {
     opacity: 0.7,
     textAlign: 'center',
+    color: '#FFFFFF',
   },
   recetasList: {
     padding: 16,
@@ -329,14 +354,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     flex: 1,
+    color: '#FFFFFF',
   },
   recetaFecha: {
     fontSize: 12,
     opacity: 0.7,
+    color: '#FFFFFF',
   },
   recetaPaciente: {
     fontSize: 14,
     opacity: 0.8,
+    color: '#FFFFFF',
   },
   medicamentosContainer: {
     flexDirection: 'row',
@@ -347,7 +375,7 @@ const styles = StyleSheet.create({
   medicamentoChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(128,128,128,0.1)',
+    backgroundColor: 'rgba(128, 128, 128, 0.15)', // colors.utils.chipBackground
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 12,
@@ -356,21 +384,39 @@ const styles = StyleSheet.create({
   medicamentoText: {
     fontSize: 12,
     maxWidth: 100,
+    color: '#FFFFFF',
   },
   masText: {
     fontSize: 12,
     opacity: 0.7,
     alignSelf: 'center',
+    color: '#FFFFFF',
   },
   actionsContainer: {
     flexDirection: 'row',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(128,128,128,0.2)',
+    borderTopColor: 'rgba(128, 128, 128, 0.2)', // Similar a colors.utils.divider
     padding: 12,
     gap: 12,
     justifyContent: 'flex-end',
   },
   actionButton: {
     padding: 8,
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: 20,
+    top: '50%',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 1000,
   },
 });

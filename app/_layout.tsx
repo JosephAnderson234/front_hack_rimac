@@ -38,22 +38,11 @@ function RootLayoutNav() {
     console.log('[RootLayout] Segments:', segments);
 
     const inAuthScreens = segments[0] === 'sign-in' || segments[0] === 'sign-up';
-    const inTabs = segments[0] === '(tabs)';
 
-    // Si no está autenticado y no está en pantallas de auth, redirigir a sign-in
-    if (!user && !inAuthScreens) {
-      console.log('[RootLayout] No autenticado, redirigiendo a sign-in...');
-      router.replace('/sign-in');
-    }
     // Si está autenticado y está en pantallas de auth, redirigir a salud
-    else if (user && inAuthScreens) {
+    if (user && inAuthScreens) {
       console.log('[RootLayout] Autenticado en pantalla de auth, redirigiendo a salud...');
-      router.replace('/(tabs)/salud');
-    }
-    // Si está autenticado pero no está en ninguna pantalla específica (app recién abierta)
-    else if (user && !inTabs && !inAuthScreens) {
-      console.log('[RootLayout] Autenticado al abrir app, redirigiendo a salud...');
-      router.replace('/(tabs)/salud');
+      router.replace('/(tabs)/salud' as any);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, segments, isLoading, rootNavigationState?.key]);
@@ -61,6 +50,7 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="sign-in" options={{ headerShown: false }} />
         <Stack.Screen name="sign-up" options={{ headerShown: false }} />
@@ -103,7 +93,7 @@ export default function RootLayout() {
 
     // B. Listener: Cuando el usuario TOCA la notificación (App abierta, cerrada o en background)
     const notificationResponseSubscription = Notifications.addNotificationResponseReceivedListener(
-      response => {
+      (response: any) => {
         const data = response.notification.request.content.data;
         console.log('👆 Usuario tocó la notificación:', data);
 

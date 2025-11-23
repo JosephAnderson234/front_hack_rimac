@@ -163,7 +163,7 @@ export default function FamiliaScreen() {
                     </View>
                 ) : dependientes.length === 0 ? (
                     <View style={styles.emptyList}>
-                        <Ionicons name="person-add-outline" size={48} color={colors.icon} />
+                        <Ionicons name="person-add-outline" size={48} color={colors.icon.default} />
                         <ThemedText style={styles.emptyListText}>
                             No tienes dependientes registrados
                         </ThemedText>
@@ -190,7 +190,7 @@ export default function FamiliaScreen() {
                                         {dependiente.parentesco} • {dependiente.cumpleanos}
                                     </ThemedText>
                                 </View>
-                                <Ionicons name="chevron-forward" size={24} color={colors.icon} />
+                                <Ionicons name="chevron-forward" size={24} color={colors.icon.default} />
                             </TouchableOpacity>
                         ))}
                     </ThemedView>
@@ -209,7 +209,7 @@ export default function FamiliaScreen() {
                         <View style={styles.modalHeader}>
                             <ThemedText type="subtitle">Agregar Dependiente</ThemedText>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
-                                <Ionicons name="close" size={28} color={colors.text} />
+                                <Ionicons name="close" size={28} color={colors.text.primary} />
                             </TouchableOpacity>
                         </View>
 
@@ -219,10 +219,10 @@ export default function FamiliaScreen() {
                                 <TextInput
                                     style={[styles.input, { 
                                         backgroundColor: colorScheme === 'dark' ? '#333' : '#f5f5f5',
-                                        color: colors.text 
+                                        color: colors.text.primary 
                                     }]}
                                     placeholder="Ej: Juan Pérez"
-                                    placeholderTextColor={colors.icon}
+                                    placeholderTextColor={colors.icon.secondary}
                                     value={nombre}
                                     onChangeText={setNombre}
                                 />
@@ -233,10 +233,10 @@ export default function FamiliaScreen() {
                                 <TextInput
                                     style={[styles.input, { 
                                         backgroundColor: colorScheme === 'dark' ? '#333' : '#f5f5f5',
-                                        color: colors.text 
+                                        color: colors.text.primary 
                                     }]}
                                     placeholder="YYYY-MM-DD (Ej: 2015-05-20)"
-                                    placeholderTextColor={colors.icon}
+                                    placeholderTextColor={colors.icon.secondary}
                                     value={cumpleanos}
                                     onChangeText={setCumpleanos}
                                 />
@@ -259,7 +259,7 @@ export default function FamiliaScreen() {
                                             <RNText
                                                 style={[
                                                     styles.radioText,
-                                                    { color: parentesco === option ? '#fff' : colors.text },
+                                                    { color: parentesco === option ? '#fff' : colors.text.primary },
                                                 ]}
                                             >
                                                 {option}
@@ -282,7 +282,7 @@ export default function FamiliaScreen() {
                                         <RNText
                                             style={[
                                                 styles.radioText,
-                                                { color: sexo === 'M' ? '#fff' : colors.text },
+                                                { color: sexo === 'M' ? '#fff' : colors.text.primary },
                                             ]}
                                         >
                                             Masculino
@@ -298,7 +298,7 @@ export default function FamiliaScreen() {
                                         <RNText
                                             style={[
                                                 styles.radioText,
-                                                { color: sexo === 'F' ? '#fff' : colors.text },
+                                                { color: sexo === 'F' ? '#fff' : colors.text.primary },
                                             ]}
                                         >
                                             Femenino
@@ -385,12 +385,12 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     addButtonText: {
-        color: '#fff',
+        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
     },
     buttonText: {
-        color: '#fff',
+        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
     },
@@ -406,6 +406,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
         opacity: 0.7,
         textAlign: 'center',
+        color: '#FFFFFF',
     },
     membersList: {
         padding: 16,
@@ -436,15 +437,17 @@ const styles = StyleSheet.create({
     memberName: {
         fontSize: 18,
         fontWeight: '600',
+        color: '#FFFFFF',
     },
     memberRelation: {
         fontSize: 14,
         opacity: 0.7,
         marginTop: 4,
+        color: '#FFFFFF',
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // colors.utils.modalOverlay
         justifyContent: 'flex-end',
     },
     modalContent: {

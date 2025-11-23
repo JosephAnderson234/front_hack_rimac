@@ -5,11 +5,11 @@ import { useAuth } from '@/contexts/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
+    ActivityIndicator,
+    Alert,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
 } from 'react-native';
 
 export function RegisterForm() {
@@ -59,10 +59,10 @@ export function RegisterForm() {
       <TextInput
         style={[
           styles.input,
-          { borderColor: colors.icon, color: colors.text },
+          { borderColor: colors.icon.default, color: colors.text.primary },
         ]}
         placeholder="Nombre"
-        placeholderTextColor={colors.icon}
+        placeholderTextColor={colors.icon.secondary}
         value={nombre}
         onChangeText={setNombre}
         editable={!isLoading}
@@ -71,10 +71,10 @@ export function RegisterForm() {
       <TextInput
         style={[
           styles.input,
-          { borderColor: colors.icon, color: colors.text },
+          { borderColor: colors.icon.default, color: colors.text.primary },
         ]}
         placeholder="Correo"
-        placeholderTextColor={colors.icon}
+        placeholderTextColor={colors.icon.secondary}
         value={correo}
         onChangeText={setCorreo}
         autoCapitalize="none"
@@ -85,10 +85,10 @@ export function RegisterForm() {
       <TextInput
         style={[
           styles.input,
-          { borderColor: colors.icon, color: colors.text },
+          { borderColor: colors.icon.default, color: colors.text.primary },
         ]}
         placeholder="Contraseña"
-        placeholderTextColor={colors.icon}
+        placeholderTextColor={colors.icon.secondary}
         value={contrasena}
         onChangeText={setContrasena}
         secureTextEntry
@@ -99,26 +99,26 @@ export function RegisterForm() {
         <TouchableOpacity
           style={[
             styles.sexoButton,
-            { borderColor: colors.icon },
+            { borderColor: colors.icon.default },
             sexo === 'M' && { backgroundColor: colors.tint, borderColor: colors.tint }
           ]}
           onPress={() => setSexo('M')}
           disabled={isLoading}
         >
-          <ThemedText style={[styles.sexoText, sexo === 'M' && { color: '#fff' }]}>
+          <ThemedText style={[styles.sexoText, sexo === 'M' && { color: '#FFFFFF' }]}>
             Masculino
           </ThemedText>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
             styles.sexoButton,
-            { borderColor: colors.icon },
+            { borderColor: colors.icon.default },
             sexo === 'F' && { backgroundColor: colors.tint, borderColor: colors.tint }
           ]}
           onPress={() => setSexo('F')}
           disabled={isLoading}
         >
-          <ThemedText style={[styles.sexoText, sexo === 'F' && { color: '#fff' }]}>
+          <ThemedText style={[styles.sexoText, sexo === 'F' && { color: '#FFFFFF' }]}>
             Femenino
           </ThemedText>
         </TouchableOpacity>
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

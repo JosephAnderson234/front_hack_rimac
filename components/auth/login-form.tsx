@@ -5,11 +5,11 @@ import { useAuth } from '@/contexts/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
+    ActivityIndicator,
+    Alert,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
 } from 'react-native';
 
 export function LoginForm() {
@@ -52,10 +52,10 @@ export function LoginForm() {
       <TextInput
         style={[
           styles.input,
-          { borderColor: colors.icon, color: colors.text },
+          { borderColor: colors.icon.default, color: colors.text.primary },
         ]}
         placeholder="Email"
-        placeholderTextColor={colors.icon}
+        placeholderTextColor={colors.icon.secondary}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -66,10 +66,10 @@ export function LoginForm() {
       <TextInput
         style={[
           styles.input,
-          { borderColor: colors.icon, color: colors.text },
+          { borderColor: colors.icon.default, color: colors.text.primary },
         ]}
         placeholder="Contraseña"
-        placeholderTextColor={colors.icon}
+        placeholderTextColor={colors.icon.secondary}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

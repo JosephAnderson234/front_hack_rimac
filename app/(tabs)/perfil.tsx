@@ -28,7 +28,7 @@ export default function PerfilScreen() {
                         onPress={() => router.back()}
                         style={styles.backButton}
                     >
-                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                        <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
                     </TouchableOpacity>
                     <ThemedText type="title">Mi Perfil</ThemedText>
                     <View style={{ width: 40 }} />
@@ -48,7 +48,7 @@ export default function PerfilScreen() {
                 <ThemedView style={styles.infoContainer}>
                     <ThemedView style={[styles.infoBox, { backgroundColor: colors.background }]}>
                         <View style={styles.infoRow}>
-                            <Ionicons name="mail-outline" size={20} color={colors.icon} />
+                            <Ionicons name="mail-outline" size={20} color={colors.icon.default} />
                             <View style={styles.infoContent}>
                                 <ThemedText style={styles.label}>Correo</ThemedText>
                                 <ThemedText style={styles.value}>{user?.correo || 'No disponible'}</ThemedText>
@@ -58,7 +58,7 @@ export default function PerfilScreen() {
 
                     <ThemedView style={[styles.infoBox, { backgroundColor: colors.background }]}>
                         <View style={styles.infoRow}>
-                            <Ionicons name="person-outline" size={20} color={colors.icon} />
+                            <Ionicons name="person-outline" size={20} color={colors.icon.default} />
                             <View style={styles.infoContent}>
                                 <ThemedText style={styles.label}>Nombre</ThemedText>
                                 <ThemedText style={styles.value}>{user?.nombre || 'No disponible'}</ThemedText>
@@ -71,7 +71,7 @@ export default function PerfilScreen() {
                             <Ionicons
                                 name={user?.sexo === 'M' ? 'male' : 'female'}
                                 size={20}
-                                color={colors.icon}
+                                color={colors.icon.default}
                             />
                             <View style={styles.infoContent}>
                                 <ThemedText style={styles.label}>Sexo</ThemedText>
@@ -84,7 +84,7 @@ export default function PerfilScreen() {
 
                     <ThemedView style={[styles.infoBox, { backgroundColor: colors.background }]}>
                         <View style={styles.infoRow}>
-                            <Ionicons name="shield-checkmark-outline" size={20} color={colors.icon} />
+                            <Ionicons name="shield-checkmark-outline" size={20} color={colors.icon.default} />
                             <View style={styles.infoContent}>
                                 <ThemedText style={styles.label}>Rol</ThemedText>
                                 <ThemedText style={styles.value}>{user?.rol || 'USER'}</ThemedText>
@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
     },
     userName: {
         fontSize: 24,
+        color: '#FFFFFF',
     },
     infoContainer: {
         padding: 20,
@@ -166,10 +167,12 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 12,
         opacity: 0.7,
+        color: '#FFFFFF',
     },
     value: {
         fontSize: 16,
         fontWeight: '600',
+        color: '#FFFFFF',
     },
     logoutButton: {
         flexDirection: 'row',
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     buttonText: {
-        color: '#fff',
+        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
     },

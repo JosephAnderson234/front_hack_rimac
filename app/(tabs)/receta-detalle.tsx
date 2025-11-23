@@ -1,8 +1,10 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
+import { generarTiendasParaMedicamento, ordenarTiendasPorMejorOpcion } from '@/data/tiendas-mock';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Receta, RecetaDetalle } from '@/interfaces/recetas';
+import { Tienda } from '@/interfaces/tiendas';
 import { getRecetaDetalle, updateReceta } from '@/services/recetas';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -11,12 +13,13 @@ import {
     ActivityIndicator,
     Alert,
     Image,
+    Linking,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
 export default function RecetaDetalleScreen() {
@@ -31,6 +34,8 @@ export default function RecetaDetalleScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [medicamentoSeleccionado, setMedicamentoSeleccionado] = useState<string | null>(null);
+  const [tiendasDisponibles, setTiendasDisponibles] = useState<Tienda[]>([]);
 
   // Estados para edición
   const [paciente, setPaciente] = useState('');
@@ -156,6 +161,23 @@ export default function RecetaDetalleScreen() {
     setMedicamentos(updated);
   };
 
+  const handleBuscarTiendas = (nombreMedicamento: string) => {
+    console.log('[RecetaDetalle] Buscando tiendas para:', nombreMedicamento);
+    const tiendas = generarTiendasParaMedicamento(nombreMedicamento);
+    const tiendasOrdenadas = ordenarTiendasPorMejorOpcion(tiendas);
+    setTiendasDisponibles(tiendasOrdenadas);
+    setMedicamentoSeleccionado(nombreMedicamento);
+  };
+
+  const handleAbrirTiendaOnline = (url: string) => {
+    Linking.openURL(url);
+  };
+
+  const handleAbrirMapa = (direccion: string) => {
+    const query = encodeURIComponent(direccion);
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`);
+  };
+
   if (isLoading) {
     return (
       <ThemedView style={styles.container}>
@@ -177,7 +199,7 @@ export default function RecetaDetalleScreen() {
         {/* Header con botón de regreso */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
+            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
           <ThemedText type="title">Detalle de Receta</ThemedText>
           <View style={{ width: 40 }} />
@@ -189,7 +211,7 @@ export default function RecetaDetalleScreen() {
         {/* Información general */}
         <ThemedView style={styles.content}>
           <View style={styles.infoRow}>
-            <Ionicons name="calendar-outline" size={20} color={colors.icon} />
+            <Ionicons name="calendar-outline" size={20} color={colors.icon.default} />
             <ThemedText style={styles.infoText}>
               {new Date(receta.fecha_subida).toLocaleDateString('es-ES', {
                 day: 'numeric',
@@ -204,11 +226,11 @@ export default function RecetaDetalleScreen() {
             <ThemedText style={styles.sectionTitle}>Paciente</ThemedText>
             {isEditing ? (
               <TextInput
-                style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
+                style={[styles.input, { borderColor: colors.icon.default, color: colors.text.primary }]}
                 value={paciente}
                 onChangeText={setPaciente}
                 placeholder="Nombre del paciente"
-                placeholderTextColor={colors.icon}
+                placeholderTextColor={colors.icon.secondary}
               />
             ) : (
               <ThemedText style={styles.sectionValue}>
@@ -222,11 +244,11 @@ export default function RecetaDetalleScreen() {
             <ThemedText style={styles.sectionTitle}>Institución</ThemedText>
             {isEditing ? (
               <TextInput
-                style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
+                style={[styles.input, { borderColor: colors.icon.default, color: colors.text.primary }]}
                 value={institucion}
                 onChangeText={setInstitucion}
                 placeholder="Nombre de la institución"
-                placeholderTextColor={colors.icon}
+                placeholderTextColor={colors.icon.secondary}
               />
             ) : (
               <ThemedText style={styles.sectionValue}>{receta.institucion}</ThemedText>
@@ -261,25 +283,25 @@ export default function RecetaDetalleScreen() {
                 {isEditing ? (
                   <>
                     <TextInput
-                      style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
+                      style={[styles.input, { borderColor: colors.icon.default, color: colors.text.primary }]}
                       value={med.producto}
                       onChangeText={(text) => handleUpdateMedicamento(index, 'producto', text)}
                       placeholder="Nombre del medicamento"
-                      placeholderTextColor={colors.icon}
+                      placeholderTextColor={colors.icon.secondary}
                     />
                     <TextInput
-                      style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
+                      style={[styles.input, { borderColor: colors.icon.default, color: colors.text.primary }]}
                       value={med.dosis}
                       onChangeText={(text) => handleUpdateMedicamento(index, 'dosis', text)}
                       placeholder="Dosis (ej: 500 mg)"
-                      placeholderTextColor={colors.icon}
+                      placeholderTextColor={colors.icon.secondary}
                     />
                     <View style={styles.row}>
                       <TextInput
                         style={[
                           styles.input,
                           styles.smallInput,
-                          { borderColor: colors.icon, color: colors.text },
+                          { borderColor: colors.icon.default, color: colors.text.primary },
                         ]}
                         value={String(med.frecuencia_valor)}
                         onChangeText={(text) =>
@@ -287,33 +309,42 @@ export default function RecetaDetalleScreen() {
                         }
                         placeholder="Cada"
                         keyboardType="numeric"
-                        placeholderTextColor={colors.icon}
+                        placeholderTextColor={colors.icon.secondary}
                       />
                       <TextInput
                         style={[
                           styles.input,
                           styles.flex1,
-                          { borderColor: colors.icon, color: colors.text },
+                          { borderColor: colors.icon.default, color: colors.text.primary },
                         ]}
                         value={med.frecuencia_unidad}
                         onChangeText={(text) =>
                           handleUpdateMedicamento(index, 'frecuencia_unidad', text)
                         }
                         placeholder="hora/día"
-                        placeholderTextColor={colors.icon}
+                        placeholderTextColor={colors.icon.secondary}
                       />
                     </View>
                     <TextInput
-                      style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
+                      style={[styles.input, { borderColor: colors.icon.default, color: colors.text.primary }]}
                       value={med.duracion}
                       onChangeText={(text) => handleUpdateMedicamento(index, 'duracion', text)}
                       placeholder="Duración (ej: 7 días)"
-                      placeholderTextColor={colors.icon}
+                      placeholderTextColor={colors.icon.secondary}
                     />
                   </>
                 ) : (
                   <>
-                    <ThemedText style={styles.medicamentoNombre}>{med.producto}</ThemedText>
+                    <View style={styles.medicamentoHeader}>
+                      <ThemedText style={styles.medicamentoNombre}>{med.producto}</ThemedText>
+                      <TouchableOpacity
+                        style={[styles.buscarTiendaButton, { backgroundColor: colors.tint }]}
+                        onPress={() => handleBuscarTiendas(med.producto)}
+                      >
+                        <Ionicons name="storefront-outline" size={16} color="#fff" />
+                        <Text style={styles.buscarTiendaText}>Buscar</Text>
+                      </TouchableOpacity>
+                    </View>
                     <ThemedText style={styles.medicamentoDetalle}>Dosis: {med.dosis}</ThemedText>
                     <ThemedText style={styles.medicamentoDetalle}>
                       Frecuencia: Cada {med.frecuencia_valor} {med.frecuencia_unidad}
@@ -327,6 +358,88 @@ export default function RecetaDetalleScreen() {
               </View>
             ))}
           </View>
+
+          {/* Tiendas Cercanas */}
+          {medicamentoSeleccionado && tiendasDisponibles.length > 0 && (
+            <View style={styles.section}>
+              <View style={styles.tiendasHeader}>
+                <Ionicons name="storefront" size={24} color={colors.tint} />
+                <ThemedText style={styles.sectionTitle}>
+                  Tiendas para "{medicamentoSeleccionado}"
+                </ThemedText>
+              </View>
+              <ThemedText style={styles.tiendasSubtitle}>
+                Ordenadas por mejor precio y distancia
+              </ThemedText>
+
+              {tiendasDisponibles.map((tienda, index) => (
+                <View
+                  key={tienda.id}
+                  style={[
+                    styles.tiendaCard,
+                    { backgroundColor: colors.background },
+                    index === 0 && styles.mejorTiendaCard,
+                  ]}
+                >
+                  {index === 0 && (
+                    <View style={styles.mejorOpcionBadge}>
+                      <Ionicons name="star" size={14} color="#FFD700" />
+                      <Text style={styles.mejorOpcionText}>Mejor Opción</Text>
+                    </View>
+                  )}
+
+                  <View style={styles.tiendaHeader}>
+                    <View style={styles.tiendaInfo}>
+                      <ThemedText style={styles.tiendaNombre}>{tienda.nombre}</ThemedText>
+                      <View style={styles.tiendaRating}>
+                        <Ionicons name="star" size={14} color="#FFD700" />
+                        <ThemedText style={styles.ratingText}>{tienda.rating}</ThemedText>
+                      </View>
+                    </View>
+                    <View style={styles.tiendaPrecio}>
+                      <Text style={styles.precioValue}>S/ {tienda.precio.toFixed(2)}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.tiendaDetalles}>
+                    <View style={styles.tiendaDetalle}>
+                      <Ionicons name="location-outline" size={16} color={colors.icon.default} />
+                      <ThemedText style={styles.tiendaDetalleText}>
+                        {tienda.distancia} km • {tienda.direccion}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.tiendaDetalle}>
+                      <Ionicons name="time-outline" size={16} color={colors.icon.default} />
+                      <ThemedText style={styles.tiendaDetalleText}>{tienda.horario}</ThemedText>
+                    </View>
+                  </View>
+
+                  <View style={styles.tiendaAcciones}>
+                    {tienda.urlTiendaOnline && (
+                      <TouchableOpacity
+                        style={[styles.tiendaBoton, { borderColor: colors.tint }]}
+                        onPress={() => handleAbrirTiendaOnline(tienda.urlTiendaOnline!)}
+                      >
+                        <Ionicons name="cart-outline" size={18} color={colors.tint} />
+                        <Text style={[styles.tiendaBotonText, { color: colors.tint }]}>
+                          Tienda Online
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity
+                      style={[styles.tiendaBoton, { borderColor: colors.tint }]}
+                      onPress={() => handleAbrirMapa(tienda.direccion)}
+                    >
+                      <Ionicons name="navigate-outline" size={18} color={colors.tint} />
+                      <Text style={[styles.tiendaBotonText, { color: colors.tint }]}>
+                        Cómo llegar
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
 
           {/* Botones de acción */}
           <View style={styles.actions}>
@@ -424,10 +537,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
+    color: '#FFFFFF',
   },
   sectionValue: {
     fontSize: 16,
     opacity: 0.8,
+    color: '#FFFFFF',
   },
   input: {
     borderWidth: 1,
@@ -462,13 +577,150 @@ const styles = StyleSheet.create({
     right: 8,
     zIndex: 1,
   },
+  medicamentoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   medicamentoNombre: {
     fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+    color: '#FFFFFF',
+  },
+  buscarTiendaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  buscarTiendaText: {
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: '600',
   },
   medicamentoDetalle: {
     fontSize: 14,
     opacity: 0.7,
+  },
+  tiendasHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  tiendasSubtitle: {
+    fontSize: 13,
+    opacity: 0.7,
+    marginBottom: 16,
+  },
+  tiendaCard: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  mejorTiendaCard: {
+    borderColor: '#FFD700',
+    borderWidth: 2,
+  },
+  mejorOpcionBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFF9E6',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+  },
+  mejorOpcionText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#B8860B',
+  },
+  tiendaHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  tiendaInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  tiendaNombre: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  tiendaRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  ratingText: {
+    fontSize: 13,
+    opacity: 0.8,
+    color: '#FFFFFF',
+  },
+  tiendaPrecio: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  precioValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  tiendaDetalles: {
+    gap: 8,
+    marginBottom: 12,
+  },
+  tiendaDetalle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  tiendaDetalleText: {
+    fontSize: 13,
+    opacity: 0.8,
+    flex: 1,
+    color: '#FFFFFF',
+  },
+  tiendaAcciones: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  tiendaBoton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  tiendaBotonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   actions: {
     flexDirection: 'row',
@@ -483,18 +735,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelButton: {
-    backgroundColor: 'rgba(128,128,128,0.2)',
+    backgroundColor: 'rgba(128, 128, 128, 0.2)', // colors.utils.cancelButton
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#FFFFFF',
   },
   saveButton: {
     flexDirection: 'row',
     gap: 8,
   },
   saveButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -503,7 +756,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   editButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

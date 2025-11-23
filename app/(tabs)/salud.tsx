@@ -1,3 +1,4 @@
+import { ChatInteligente } from '@/components/chat-inteligente';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
@@ -5,7 +6,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import { Accelerometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface MovementRecord {
   timestamp: number;
@@ -25,6 +26,7 @@ export default function SaludScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const [steps, setSteps] = useState(0);
   const [isAvailable, setIsAvailable] = useState(true);
+  const [chatVisible, setChatVisible] = useState(false);
 
   // Estados de sueño
   const [sleepState, setSleepState] = useState<SleepState>('monitoring');
@@ -219,6 +221,27 @@ export default function SaludScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      {/* Botón flotante */}
+      <TouchableOpacity
+        style={[styles.floatingButton, { backgroundColor: colors.tint }]}
+        onPress={() => {
+          console.log('[SaludScreen] Abriendo chat con contexto: Estadisticas');
+          setChatVisible(true);
+        }}
+      >
+        <Ionicons name="chatbubbles" size={28} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Chat inteligente */}
+      <ChatInteligente
+        visible={chatVisible}
+        onClose={() => {
+          console.log('[SaludScreen] Cerrando chat');
+          setChatVisible(false);
+        }}
+        contextoInicial="Estadisticas"
+      />
+
       <ScrollView style={styles.scrollView}>
         <ThemedView style={styles.header}>
           <ThemedText type="title">Salud</ThemedText>
@@ -274,6 +297,45 @@ export default function SaludScreen() {
             </>
           )}
         </ThemedView>
+
+        {/* Contador de Sueño en Tiempo Real */}
+        {sleepState === 'sleeping' && sleepSession.startTime && (
+          <ThemedView style={[styles.sleepCard, { backgroundColor: '#9B59B6' }]}>
+            <View style={styles.sleepHeader}>
+              <Ionicons name="moon" size={32} color="#fff" />
+              <View style={styles.sleepHeaderText}>
+                <Text style={styles.sleepTitle}>Durmiendo</Text>
+                <View style={styles.liveBadge}>
+                  <View style={styles.liveDot} />
+                  <Text style={styles.liveText}>EN VIVO</Text>
+                </View>
+              </View>
+            </View>
+            <View style={styles.sleepTimeDisplay}>
+              <Text style={styles.sleepTimeValue}>
+                {Math.floor(sleepSession.duration / 60)}h {sleepSession.duration % 60}m
+              </Text>
+              <Text style={styles.sleepTimeLabel}>Tiempo de Sueño</Text>
+            </View>
+            <View style={styles.sleepDetails}>
+              <View style={styles.sleepDetailItem}>
+                <Ionicons name="time-outline" size={16} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.sleepDetailText}>
+                  Inicio: {sleepSession.startTime.toLocaleTimeString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
+                </Text>
+              </View>
+              <View style={styles.sleepDetailItem}>
+                <Ionicons name="pulse-outline" size={16} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.sleepDetailText}>
+                  {movementCount} movimientos
+                </Text>
+              </View>
+            </View>
+          </ThemedView>
+        )}
 
 
 
@@ -421,11 +483,11 @@ const styles = StyleSheet.create({
   stepsValue: {
     fontSize: 40,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF',
   },
   stepsLabel: {
     fontSize: 16,
-    color: '#000',
+    color: '#FFFFFF',
     opacity: 0.9,
     marginTop: 4,
   },
@@ -440,12 +502,12 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#000',
+    backgroundColor: '#FFFFFF',
     borderRadius: 4,
   },
   goalText: {
     fontSize: 12,
-    color: '#fff',
+    color: '#FFFFFF',
     opacity: 0.8,
   },
   stepsUnavailable: {
@@ -457,12 +519,12 @@ const styles = StyleSheet.create({
   unavailableText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
+    color: '#FFFFFF',
     textAlign: 'center',
   },
   unavailableSubtext: {
     fontSize: 14,
-    color: '#000',
+    color: '#FFFFFF',
     opacity: 0.8,
     textAlign: 'center',
   },
@@ -557,5 +619,101 @@ const styles = StyleSheet.create({
   qualityText: {
     fontSize: 11,
     fontWeight: '600',
+  },
+  sleepCard: {
+    margin: 16,
+    marginTop: 0,
+    padding: 24,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  sleepHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 20,
+  },
+  sleepHeaderText: {
+    flex: 1,
+  },
+  sleepTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+  },
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4CAF50',
+  },
+  liveText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  sleepTimeDisplay: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sleepTimeValue: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    letterSpacing: -1,
+  },
+  sleepTimeLabel: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 4,
+  },
+  sleepDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.2)',
+  },
+  sleepDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  sleepDetailText: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '500',
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: 20,
+    top: '50%',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 1000,
   },
 });

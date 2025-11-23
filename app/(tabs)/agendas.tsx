@@ -7,12 +7,12 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import { useState } from 'react';
 import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 // Data mockeada de doctores
@@ -389,6 +389,7 @@ export default function AgendasScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [searchQuery, setSearchQuery] = useState('');
+  const [chatVisible, setChatVisible] = useState(false);
 
   // Función para convertir nombre a formato URL
   const nombreToUrl = (nombre: string): string => {
@@ -457,6 +458,27 @@ export default function AgendasScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      {/* Botón flotante */}
+      <TouchableOpacity
+        style={[styles.floatingButton, { backgroundColor: colors.tint }]}
+        onPress={() => {
+          console.log('[AgendasScreen] Abriendo chat con contexto: Servicios');
+          setChatVisible(true);
+        }}
+      >
+        <Ionicons name="chatbubbles" size={28} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Chat inteligente */}
+      <ChatInteligente
+        visible={chatVisible}
+        onClose={() => {
+          console.log('[AgendasScreen] Cerrando chat');
+          setChatVisible(false);
+        }}
+        contextoInicial="Servicios"
+      />
+
       <ScrollView style={styles.scrollView}>
         <ThemedView style={styles.header}>
           <ThemedText type="title">Doctores</ThemedText>
@@ -475,17 +497,17 @@ export default function AgendasScreen() {
               },
             ]}
           >
-            <Ionicons name="search" size={20} color={colors.icon} />
+            <Ionicons name="search" size={20} color={colors.icon.default} />
             <TextInput
-              style={[styles.searchInput, { color: colors.text }]}
+              style={[styles.searchInput, { color: colors.text.primary }]}
               placeholder="Buscar por nombre, especialidad o sede..."
-              placeholderTextColor={colors.icon}
+              placeholderTextColor={colors.icon.secondary}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={20} color={colors.icon} />
+                <Ionicons name="close-circle" size={20} color={colors.icon.default} />
               </TouchableOpacity>
             )}
           </View>
@@ -503,7 +525,7 @@ export default function AgendasScreen() {
         <ThemedView style={styles.doctorsList}>
           {doctoresFiltrados.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="search-outline" size={64} color={colors.icon} />
+              <Ionicons name="search-outline" size={64} color={colors.icon.default} />
               <ThemedText style={styles.emptyText}>
                 No se encontraron doctores con ese criterio
               </ThemedText>
@@ -530,22 +552,22 @@ export default function AgendasScreen() {
                 <View style={styles.doctorInfo}>
                   <ThemedText style={styles.doctorName}>{doctor.nombre}</ThemedText>
                   <View style={styles.infoRow}>
-                    <Ionicons name="medical" size={14} color={colors.icon} />
+                    <Ionicons name="medical" size={14} color={colors.icon.default} />
                     <ThemedText style={styles.infoText}>{doctor.especialidad}</ThemedText>
                   </View>
                   <View style={styles.infoRow}>
-                    <Ionicons name="location" size={14} color={colors.icon} />
+                    <Ionicons name="location" size={14} color={colors.icon.default} />
                     <ThemedText style={styles.infoText}>{doctor.sedes.join(', ')}</ThemedText>
                   </View>
                   <View style={styles.infoRow}>
-                    <Ionicons name="videocam" size={14} color={colors.icon} />
+                    <Ionicons name="videocam" size={14} color={colors.icon.default} />
                     <ThemedText style={styles.infoText}>{doctor.tipo_atencion}</ThemedText>
                   </View>
                   <View style={styles.cmpBadge}>
                     <ThemedText style={styles.cmpText}>CMP: {doctor.codigo_cmp}</ThemedText>
                   </View>
                 </View>
-                <Ionicons name="chevron-forward" size={24} color={colors.icon} />
+                <Ionicons name="chevron-forward" size={24} color={colors.icon.default} />
               </TouchableOpacity>
             ))
           )}
@@ -584,6 +606,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+    color: '#FFFFFF',
   },
   resultsCount: {
     paddingHorizontal: 20,
@@ -592,6 +615,7 @@ const styles = StyleSheet.create({
   resultsText: {
     fontSize: 14,
     opacity: 0.7,
+    color: '#FFFFFF',
   },
   doctorsList: {
     padding: 16,
@@ -624,6 +648,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
+    color: '#FFFFFF',
   },
   infoRow: {
     flexDirection: 'row',
@@ -634,6 +659,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     opacity: 0.7,
     flex: 1,
+    color: '#FFFFFF',
   },
   cmpBadge: {
     alignSelf: 'flex-start',
@@ -646,6 +672,7 @@ const styles = StyleSheet.create({
   cmpText: {
     fontSize: 11,
     opacity: 0.6,
+    color: '#FFFFFF',
   },
   emptyState: {
     alignItems: 'center',
@@ -656,5 +683,22 @@ const styles = StyleSheet.create({
     marginTop: 16,
     opacity: 0.7,
     textAlign: 'center',
+    color: '#FFFFFF',
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: 20,
+    top: '50%',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 1000,
   },
 });
