@@ -5,11 +5,11 @@ import { useAuth } from '@/contexts/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
 
 export function LoginForm() {
@@ -29,7 +29,7 @@ export function LoginForm() {
     console.log('[LoginForm] Iniciando login con:', { email });
     setIsLoading(true);
     try {
-      await login({ email, password });
+      await login({ correo:email, contrasena: password });
       console.log('[LoginForm] Login exitoso');
       // El layout se encargará de la redirección automáticamente
     } catch (error: any) {

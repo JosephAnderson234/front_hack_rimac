@@ -5,13 +5,17 @@ export default {
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
-    scheme: 'counterpasos',
+    scheme: 'healtec',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
+      bundleIdentifier: 'com.yourcompany.healtec',
+      googleServicesFile: './google-services.json'
     },
     android: {
+      package: 'com.yourcompany.healtec',
+      googleServicesFile: './google-services.json',
       adaptiveIcon: {
         backgroundColor: '#E6F4FE',
         foregroundImage: './assets/images/android-icon-foreground.png',
@@ -39,6 +43,24 @@ export default {
           },
         },
       ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png", // Icono blanco transparente
+          "color": "#ffffff",
+          "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "useAndroidX": true
+          }
+        }
+      ]
     ],
     experiments: {
       typedRoutes: true,

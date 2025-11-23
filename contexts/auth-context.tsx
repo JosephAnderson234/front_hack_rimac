@@ -9,9 +9,10 @@ import {
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface User {
-  email: string;
-  name?: string;
-  role: string;
+  correo: string;
+  nombre: string;
+  sexo: string;
+  rol: string;
 }
 
 interface AuthContextType {
@@ -56,8 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const response = await apiLogin(data);
     console.log('[AuthContext] Respuesta de login:', response);
     setUser({
-      email: response.email,
-      role: response.role,
+      correo: response.usuario.correo,
+      nombre: response.usuario.nombre,
+      sexo: response.usuario.sexo,
+      rol: response.usuario.rol,
     });
   };
 
@@ -66,9 +69,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const response = await apiRegister(data);
     console.log('[AuthContext] Respuesta de registro:', response);
     setUser({
-      email: response.usuario.email,
-      name: response.usuario.name,
-      role: response.usuario.role,
+      correo: response.usuario.correo,
+      nombre: response.usuario.nombre,
+      sexo: response.usuario.sexo,
+      rol: response.usuario.rol,
     });
   };
 

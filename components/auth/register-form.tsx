@@ -5,37 +5,38 @@ import { useAuth } from '@/contexts/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
 
 export function RegisterForm() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [contrasena, setContrasena] = useState('');
+  const [sexo, setSexo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
+    if (!nombre || !correo || !contrasena || !sexo) {
       Alert.alert('Error', 'Por favor completa todos los campos');
       return;
     }
 
-    if (password.length < 6) {
+    if (contrasena.length < 6) {
       Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
-    console.log('[RegisterForm] Iniciando registro con:', { name, email });
+    console.log('[RegisterForm] Iniciando registro con:', { nombre, correo, sexo });
     setIsLoading(true);
     try {
-      await register({ name, email, password });
+      await register({ nombre, correo, contrasena, sexo });
       console.log('[RegisterForm] Registro exitoso');
       // El layout se encargará de la redirección automáticamente
     } catch (error: any) {
@@ -62,8 +63,8 @@ export function RegisterForm() {
         ]}
         placeholder="Nombre"
         placeholderTextColor={colors.icon}
-        value={name}
-        onChangeText={setName}
+        value={nombre}
+        onChangeText={setNombre}
         editable={!isLoading}
       />
 
@@ -72,10 +73,10 @@ export function RegisterForm() {
           styles.input,
           { borderColor: colors.icon, color: colors.text },
         ]}
-        placeholder="Email"
+        placeholder="Correo"
         placeholderTextColor={colors.icon}
-        value={email}
-        onChangeText={setEmail}
+        value={correo}
+        onChangeText={setCorreo}
         autoCapitalize="none"
         keyboardType="email-address"
         editable={!isLoading}
@@ -88,11 +89,40 @@ export function RegisterForm() {
         ]}
         placeholder="Contraseña"
         placeholderTextColor={colors.icon}
-        value={password}
-        onChangeText={setPassword}
+        value={contrasena}
+        onChangeText={setContrasena}
         secureTextEntry
         editable={!isLoading}
       />
+
+      <ThemedView style={styles.sexoContainer}>
+        <TouchableOpacity
+          style={[
+            styles.sexoButton,
+            { borderColor: colors.icon },
+            sexo === 'M' && { backgroundColor: colors.tint, borderColor: colors.tint }
+          ]}
+          onPress={() => setSexo('M')}
+          disabled={isLoading}
+        >
+          <ThemedText style={[styles.sexoText, sexo === 'M' && { color: '#fff' }]}>
+            Masculino
+          </ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.sexoButton,
+            { borderColor: colors.icon },
+            sexo === 'F' && { backgroundColor: colors.tint, borderColor: colors.tint }
+          ]}
+          onPress={() => setSexo('F')}
+          disabled={isLoading}
+        >
+          <ThemedText style={[styles.sexoText, sexo === 'F' && { color: '#fff' }]}>
+            Femenino
+          </ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
 
       <TouchableOpacity
         style={[styles.button, { backgroundColor: colors.tint }]}
@@ -122,6 +152,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
+    fontSize: 16,
+  },
+  sexoContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  sexoButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+  },
+  sexoText: {
     fontSize: 16,
   },
   button: {

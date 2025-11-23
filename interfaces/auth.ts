@@ -1,31 +1,23 @@
 export interface LoginRequest {
-    email: string,
-    password: string
+    correo: string,
+    contrasena: string
 }
 
 export interface RegisterRequest{
-    email: string,
-    password: string,
-    name: string
+    correo: string,
+    contrasena: string,
+    nombre: string,
+    sexo: string
 }
 
-export interface AuthRegisterResponse{
+export interface AuthResponse{
     message: string,
     usuario: {
-        email: string,
-        name: string,
-        role: string,
-        createdAt: string
+        correo: string,
+        nombre: string,
+        sexo: string,
+        rol: string
     }
-    access_token: string,  // Corregido: access_token con dos "s"
-    id_token: string
-}
-
-
-export interface AuthLoginResponse{
-    message: string,
-    email: string,
-    role: string,
-    access_token: string,  // Corregido: access_token con dos "s"
+    access_token: string,
     id_token: string
 }

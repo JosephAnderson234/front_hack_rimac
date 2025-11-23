@@ -1,8 +1,7 @@
 import {
-  AuthLoginResponse,
-  AuthRegisterResponse,
+  AuthResponse,
   LoginRequest,
-  RegisterRequest,
+  RegisterRequest
 } from '@/interfaces/auth';
 import Constants from 'expo-constants';
 import { tokenStorage } from './storage';
@@ -54,7 +53,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 // Login
-export const login = async (data: LoginRequest): Promise<AuthLoginResponse> => {
+export const login = async (data: LoginRequest): Promise<AuthResponse> => {
   console.log('[AuthService] Login request:', `${API_URL}/login`, data);
   try {
     const response = await fetch(`${API_URL}/login`, {
@@ -66,7 +65,7 @@ export const login = async (data: LoginRequest): Promise<AuthLoginResponse> => {
     });
     console.log('[AuthService] Login status:', response.status);
 
-    const result = await handleResponse<AuthLoginResponse>(response);
+    const result = await handleResponse<AuthResponse>(response);
     console.log('[AuthService] Login result:', result);
 
     // Validar que los tokens existan
@@ -83,8 +82,10 @@ export const login = async (data: LoginRequest): Promise<AuthLoginResponse> => {
     console.log('[AuthService] Guardando tokens...');
     await tokenStorage.saveTokens(result.access_token, result.id_token);
     await tokenStorage.saveUserData({
-      email: result.email,
-      role: result.role,
+      correo: result.usuario.correo,
+      nombre: result.usuario.nombre,
+      sexo: result.usuario.sexo,
+      rol: result.usuario.rol,
     });
 
     return result;
@@ -100,7 +101,7 @@ export const login = async (data: LoginRequest): Promise<AuthLoginResponse> => {
 // Registro
 export const register = async (
   data: RegisterRequest
-): Promise<AuthRegisterResponse> => {
+): Promise<AuthResponse> => {
   console.log('[AuthService] Register request:', `${API_URL}/register`, data);
   try {
     const response = await fetch(`${API_URL}/register`, {
@@ -112,7 +113,7 @@ export const register = async (
     });
     console.log('[AuthService] Register status:', response.status);
 
-    const result = await handleResponse<AuthRegisterResponse>(response);
+    const result = await handleResponse<AuthResponse>(response);
     console.log('[AuthService] Register result:', result);
 
     // Validar que los tokens existan
@@ -129,9 +130,10 @@ export const register = async (
     console.log('[AuthService] Guardando tokens...');
     await tokenStorage.saveTokens(result.access_token, result.id_token);
     await tokenStorage.saveUserData({
-      email: result.usuario.email,
-      name: result.usuario.name,
-      role: result.usuario.role,
+      correo: result.usuario.correo,
+      nombre: result.usuario.nombre,
+      sexo: result.usuario.sexo,
+      rol: result.usuario.rol,
     });
 
     return result;
